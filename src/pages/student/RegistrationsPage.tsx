@@ -15,6 +15,18 @@ interface Event {
 }
 
 export const RegistrationsPage: React.FC = () => {
+  const getQrUrl = (rawUrl?: string) => {
+    if (!rawUrl) return '';
+    if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://')) return rawUrl;
+    const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+    const serverBase = apiBase.replace(/\/api\/?$/, '');
+    if (rawUrl.startsWith('/media/qr/')) {
+      const filename = rawUrl.replace('/media/qr/', '');
+      return `${serverBase}/api/registrations/qr/${filename}`;
+    }
+    return `${serverBase}${rawUrl}`;
+  };
+
   const [searchParams] = useSearchParams();
   const eventIdFromUrl = searchParams.get('event_id');
 
@@ -62,14 +74,22 @@ export const RegistrationsPage: React.FC = () => {
       const res = await api.post('/registrations', { event_id: selectedEventId });
       setSuccessData(res.data);
       
-      // Auto download QR code trick
-      const qrUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') + res.data.qr_code_image_url;
-      const link = document.createElement('a');
-      link.href = qrUrl;
-      link.download = `registration-${res.data.registration_number}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Auto download QR code trick using blob
+      try {
+        const fullUrl = getQrUrl(res.data.qr_code_image_url);
+        const fetchRes = await fetch(fullUrl);
+        const blob = await fetchRes.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = `registration-${res.data.registration_number}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(blobUrl);
+      } catch (dlErr) {
+        console.error('Failed auto download QR:', dlErr);
+      }
 
       // Refresh past registrations
       const regRes = await api.get('/registrations/me');
@@ -108,7 +128,7 @@ export const RegistrationsPage: React.FC = () => {
                 <p className="text-slate-400 text-sm mt-2">Your QR ticket has been generated and downloaded.</p>
               </div>
               <div className="bg-white p-4 rounded-2xl w-48 h-48 mx-auto shadow-inner">
-                <img src={import.meta.env.VITE_API_BASE_URL?.replace('/api', '') + successData.qr_code_image_url} alt="QR Code" className="w-full h-full object-contain" />
+                <img src={getQrUrl(successData.qr_code_image_url)} alt="QR Code" className="w-full h-full object-contain" />
               </div>
               <p className="text-xl font-mono font-bold text-sky-400">{successData.registration_number}</p>
               <button

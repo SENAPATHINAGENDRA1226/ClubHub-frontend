@@ -21,7 +21,19 @@ export const ProfilePage: React.FC = () => {
   });
 
   const [registrations, setRegistrations] = useState<any[]>([]);
-  const [selectedQr, setSelectedQr] = useState<string | null>(null);
+  const [selectedQr, setSelectedQr] = useState<{ url: string; regNum: string } | null>(null);
+
+  const getQrUrl = (rawUrl?: string) => {
+    if (!rawUrl) return '';
+    if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://')) return rawUrl;
+    const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+    const serverBase = apiBase.replace(/\/api\/?$/, '');
+    if (rawUrl.startsWith('/media/qr/')) {
+      const filename = rawUrl.replace('/media/qr/', '');
+      return `${serverBase}/api/registrations/qr/${filename}`;
+    }
+    return `${serverBase}${rawUrl}`;
+  };
 
   useEffect(() => {
     const fetchRegistrations = async () => {
@@ -56,13 +68,23 @@ export const ProfilePage: React.FC = () => {
     }
   };
 
-  const handleDownloadQr = (url: string, regNum: string) => {
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `registration-${regNum}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownloadQr = async (url: string, regNum: string) => {
+    try {
+      const fullUrl = getQrUrl(url);
+      const res = await fetch(fullUrl);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `registration-${regNum}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.error('Failed to download QR blob:', err);
+      window.open(getQrUrl(url), '_blank');
+    }
   };
 
   return (
@@ -234,7 +256,7 @@ export const ProfilePage: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {registrations.map(reg => (
-              <div key={reg.id} className="p-5 rounded-2xl bg-slate-900 border border-slate-800 flex justify-between items-center group hover:border-sky-500/50 transition-colors cursor-pointer" onClick={() => setSelectedQr(reg.qr_code_image_url)}>
+              <div key={reg.id} className="p-5 rounded-2xl bg-slate-900 border border-slate-800 flex justify-between items-center group hover:border-sky-500/50 transition-colors cursor-pointer" onClick={() => setSelectedQr({ url: reg.qr_code_image_url, regNum: reg.registration_number })}>
                 <div>
                   <h4 className="font-bold text-white group-hover:text-sky-400 transition-colors">{reg.event?.title}</h4>
                   <p className="text-xs text-slate-400 font-mono mt-1">{reg.registration_number}</p>
@@ -254,10 +276,10 @@ export const ProfilePage: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" onClick={() => setSelectedQr(null)}>
           <div className="bg-slate-900 p-8 rounded-3xl border border-slate-800 max-w-sm w-full text-center space-y-6 shadow-2xl" onClick={e => e.stopPropagation()}>
             <h3 className="text-xl font-bold text-white">Your QR Code</h3>
-            <img src={import.meta.env.VITE_API_BASE_URL?.replace('/api', '') + selectedQr} alt="QR Code" className="w-full h-auto rounded-xl bg-white p-4" />
+            <img src={getQrUrl(selectedQr.url)} alt="QR Code" className="w-full h-auto rounded-xl bg-white p-4" />
             <div className="flex gap-3">
               <button onClick={() => setSelectedQr(null)} className="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold transition-colors">Close</button>
-              <button onClick={() => handleDownloadQr(import.meta.env.VITE_API_BASE_URL?.replace('/api', '') + selectedQr, 'code')} className="flex-1 py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold transition-colors">Download</button>
+              <button onClick={() => handleDownloadQr(selectedQr.url, selectedQr.regNum)} className="flex-1 py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold transition-colors">Download</button>
             </div>
           </div>
         </div>
