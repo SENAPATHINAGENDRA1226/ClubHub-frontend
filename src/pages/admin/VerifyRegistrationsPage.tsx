@@ -57,7 +57,9 @@ export const VerifyRegistrationsPage: React.FC = () => {
   const [selectedEventId, setSelectedEventId] = useState<string>('');
 
   const [stats, setStats] = useState<VerificationStats>({ total_registered: 0, total_verified: 0, verification_rate: 0 });
-  const [mode, setMode] = useState<'camera' | 'manual'>('camera');
+  const [mode, setMode] = useState<'camera' | 'manual' | 'list'>('camera');
+  const [eventRegistrations, setEventRegistrations] = useState<any[]>([]);
+  const [isLoadingList, setIsLoadingList] = useState(false);
 
   // Verification State
   const [previewData, setPreviewData] = useState<VerificationPreview | null>(null);
@@ -109,8 +111,24 @@ export const VerifyRegistrationsPage: React.FC = () => {
   useEffect(() => {
     if (selectedEventId) {
       fetchStats(selectedEventId);
+      if (mode === 'list') {
+        fetchEventRegistrations(selectedEventId);
+      }
     }
-  }, [selectedEventId, fetchStats]);
+  }, [selectedEventId, fetchStats, mode]);
+
+  const fetchEventRegistrations = async (eventId: string) => {
+    if (!eventId) return;
+    setIsLoadingList(true);
+    try {
+      const res = await api.get(`/registrations/event/${eventId}?limit=200`);
+      setEventRegistrations(res.data.items || []);
+    } catch (err) {
+      console.error('Failed to fetch event registrations', err);
+    } finally {
+      setIsLoadingList(false);
+    }
+  };
 
   useEffect(() => {
     const unsubscribe = subscribe('registrations', () => {
@@ -329,6 +347,16 @@ export const VerifyRegistrationsPage: React.FC = () => {
               )}
               <span className="relative z-10 flex items-center gap-2"><Search className="w-4 h-4" /> Manual Search</span>
             </button>
+            <button
+              onClick={() => { setMode('list'); setPreviewData(null); if (selectedEventId) fetchEventRegistrations(selectedEventId); }}
+              className={`relative px-6 py-2.5 rounded-xl text-sm font-bold tracking-wide transition-colors flex items-center gap-2 ${mode === 'list' ? 'text-white' : 'text-slate-400 hover:text-slate-200'
+                }`}
+            >
+              {mode === 'list' && (
+                <motion.div layoutId="verifyTab" className="absolute inset-0 bg-sky-600 rounded-xl" />
+              )}
+              <span className="relative z-10 flex items-center gap-2"><Users className="w-4 h-4" /> All Registrations</span>
+            </button>
           </div>
 
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 min-h-[400px] relative overflow-hidden flex flex-col items-center justify-center">
@@ -402,6 +430,91 @@ export const VerifyRegistrationsPage: React.FC = () => {
                     <div className="text-center text-slate-500 py-8">No matching registrations found for this event.</div>
                   )}
                 </div>
+              </div>
+            )}
+
+            {mode === 'list' && !previewData && (
+              <div className="w-full self-start">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-base font-bold text-white">Registered Students ({eventRegistrations.length})</h3>
+                  <button onClick={() => fetchEventRegistrations(selectedEventId)} className="text-xs text-sky-400 font-semibold hover:underline">
+                    Refresh List
+                  </button>
+                </div>
+                {isLoadingList ? (
+                  <div className="py-12 text-center text-slate-400 flex items-center justify-center gap-2">
+                    <Loader2 className="w-5 h-5 animate-spin text-sky-400" /> Loading event registrations...
+                  </div>
+                ) : eventRegistrations.length === 0 ? (
+                  <div className="text-center text-slate-500 py-12">No student registrations for this event yet.</div>
+                ) : (
+                  <div className="space-y-3 max-h-[450px] overflow-y-auto pr-1 custom-scrollbar">
+                    {eventRegistrations.map((reg: any) => {
+                      const isVerified = reg.status === 'verified';
+                      const studentName = reg.student?.full_name || 'Student';
+                      const studentPhoto = reg.student?.profile_photo_url;
+                      return (
+                        <div
+                          key={reg.id}
+                          className="flex items-center justify-between p-4 rounded-2xl bg-slate-950 border border-slate-800 hover:border-slate-700 transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center font-bold text-slate-300 text-sm overflow-hidden shrink-0 border border-slate-700">
+                              {studentPhoto ? (
+                                <img src={import.meta.env.VITE_API_BASE_URL?.replace('/api', '') + studentPhoto} alt={studentName} className="w-full h-full object-cover" />
+                              ) : (
+                                studentName.charAt(0)
+                              )}
+                            </div>
+                            <div>
+                              <div className="font-bold text-white text-sm">{studentName}</div>
+                              <div className="text-xs text-slate-400 font-mono mt-0.5">{reg.registration_number} &bull; {reg.student?.branch || 'General'}</div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            {isVerified ? (
+                              <span className="px-3 py-1 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+                                <CheckCircle className="w-3.5 h-3.5" /> Checked In
+                              </span>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  setPreviewData({
+                                    registration_id: reg.id,
+                                    student_id: reg.student_id,
+                                    student_name: studentName,
+                                    student_photo_url: studentPhoto || null,
+                                    branch: reg.student?.branch || '',
+                                    section: reg.student?.section || '',
+                                    academic_year: reg.student?.academic_year || '',
+                                    registration_number: reg.registration_number,
+                                    event_id: reg.event_id,
+                                    event_title: reg.event?.title || '',
+                                    status: reg.status,
+                                    registered_at: reg.registered_at,
+                                    already_verified: false,
+                                    verified_at: null,
+                                    verified_by_name: null,
+                                    achievement_position: reg.achievement_position || null,
+                                    computed_certificate_url: reg.certificate_url_override || null
+                                  });
+                                  setAchievementForm({
+                                    position: reg.achievement_position || 'none',
+                                    override_url: reg.certificate_url_override || ''
+                                  });
+                                }}
+                                className="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-colors flex items-center gap-1.5 shadow-md shadow-emerald-950"
+                              >
+                                <CheckCircle className="w-3.5 h-3.5" /> Confirm Check-In
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
 

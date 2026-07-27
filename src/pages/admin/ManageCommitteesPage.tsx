@@ -66,7 +66,8 @@ export const ManageCommitteesPage: React.FC = () => {
   const [selectedCommitteeForMember, setSelectedCommitteeForMember] = useState<Committee | null>(null);
   const [memberFormData, setMemberFormData] = useState({
     full_name: '',
-    role_title: 'Committee Lead',
+    email: '',
+    role_title: 'Committee Member',
     is_lead: false,
     avatar_url: '',
   });
@@ -162,14 +163,19 @@ export const ManageCommitteesPage: React.FC = () => {
     setIsSubmittingMember(true);
     try {
       await api.post(`/committees/${selectedCommitteeForMember.id}/members`, {
-        ...memberFormData,
-        avatar_url: memberFormData.avatar_url || null,
+        full_name: memberFormData.full_name,
+        email: memberFormData.email || '',
+        role_title: memberFormData.role_title,
+        photo_url: memberFormData.avatar_url || null,
+        order_index: memberFormData.is_lead ? 0 : 10,
       });
       toast.success('Member added to committee');
       setSelectedCommitteeForMember(null);
+      setMemberFormData({ full_name: '', email: '', role_title: 'Committee Member', is_lead: false, avatar_url: '' });
       fetchCommittees();
-    } catch (err) {
-      toast.error('Failed to add committee member');
+    } catch (err: any) {
+      console.error('Failed to add committee member:', err);
+      toast.error(err.response?.data?.detail?.[0]?.msg || err.response?.data?.detail || 'Failed to add committee member');
     } finally {
       setIsSubmittingMember(false);
     }
@@ -296,7 +302,7 @@ export const ManageCommitteesPage: React.FC = () => {
                       <button
                         onClick={() => {
                           setSelectedCommitteeForMember(comm);
-                          setMemberFormData({ full_name: '', role_title: 'Lead Member', is_lead: false, avatar_url: '' });
+                          setMemberFormData({ full_name: '', email: '', role_title: 'Lead Member', is_lead: false, avatar_url: '' });
                         }}
                         className="text-sky-400 hover:text-sky-300 flex items-center gap-1 text-[11px]"
                       >
@@ -457,6 +463,17 @@ export const ManageCommitteesPage: React.FC = () => {
                     value={memberFormData.full_name}
                     onChange={(e) => setMemberFormData({ ...memberFormData, full_name: e.target.value })}
                     placeholder="Alice Smith"
+                    className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-sky-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Member Email (Optional)</label>
+                  <input
+                    type="email"
+                    value={memberFormData.email}
+                    onChange={(e) => setMemberFormData({ ...memberFormData, email: e.target.value })}
+                    placeholder="alice@example.com"
                     className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-sky-500"
                   />
                 </div>
