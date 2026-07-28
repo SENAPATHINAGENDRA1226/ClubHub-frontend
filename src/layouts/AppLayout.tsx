@@ -29,7 +29,7 @@ const studentNavItems = [
   { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
   { name: 'My Profile', path: '/profile', icon: User },
   { name: 'Registrations', path: '/profile/registrations', icon: Ticket },
-  { name: 'Certificates', path: '/profile/certificates', icon: Award },
+  { name: 'Certificates', path: '/certificates', icon: Award },
   { name: 'Events', path: '/events', icon: Calendar },
   { name: 'Resources', path: '/resources', icon: BookOpen },
   { name: 'Opportunities', path: '/opportunities', icon: Briefcase },

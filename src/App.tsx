@@ -127,6 +127,14 @@ export const App: React.FC = () => {
                 }
               />
               <Route
+                path="/profile/certificates"
+                element={
+                  <ProtectedRoute allowedRoles={['student']}>
+                    <CertificatesPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/resources"
                 element={
                   <ProtectedRoute allowedRoles={['student']}>
@@ -151,6 +159,22 @@ export const App: React.FC = () => {
                 }
               />
               <Route
+                path="/alumni"
+                element={
+                  <ProtectedRoute allowedRoles={['student']}>
+                    <AlumniAchievementsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/achievements"
+                element={
+                  <ProtectedRoute allowedRoles={['student']}>
+                    <AlumniAchievementsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/alumni-achievements"
                 element={
                   <ProtectedRoute allowedRoles={['student']}>
@@ -168,6 +192,14 @@ export const App: React.FC = () => {
               />
               <Route
                 path="/grievance"
+                element={
+                  <ProtectedRoute allowedRoles={['student']}>
+                    <GrievancePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/grievances"
                 element={
                   <ProtectedRoute allowedRoles={['student']}>
                     <GrievancePage />

@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { useRealtime } from '../../context/RealtimeContext';
@@ -9,9 +10,20 @@ import { Skeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/EmptyState';
 
 export const AlumniAchievementsPage: React.FC = () => {
+  const location = useLocation();
   const { role } = useAuth();
   const { subscribe } = useRealtime();
-  const [activeTab, setActiveTab] = useState<'achievements' | 'alumni'>('achievements');
+  const [activeTab, setActiveTab] = useState<'achievements' | 'alumni'>(
+    location.pathname.includes('alumni') ? 'alumni' : 'achievements'
+  );
+
+  useEffect(() => {
+    if (location.pathname.includes('alumni')) {
+      setActiveTab('alumni');
+    } else if (location.pathname.includes('achievements')) {
+      setActiveTab('achievements');
+    }
+  }, [location.pathname]);
   
   const [achievements, setAchievements] = useState<any[]>([]);
   const [alumni, setAlumni] = useState<any[]>([]);
