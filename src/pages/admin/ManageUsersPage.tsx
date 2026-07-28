@@ -75,9 +75,10 @@ export const ManageUsersPage: React.FC = () => {
     try {
       setLoading(true);
       const res = await api.get('/users?limit=200');
-      setUsers(res.data.items || []);
+      const items = Array.isArray(res.data) ? res.data : (res.data?.items || []);
+      setUsers(items);
     } catch (err) {
-      console.error(err);
+      console.error('Failed to fetch users:', err);
       toast.error('Failed to fetch users');
     } finally {
       setLoading(false);
@@ -194,6 +195,12 @@ export const ManageUsersPage: React.FC = () => {
 
   const handleDelete = async () => {
     if (!deletingId) return;
+    const targetUser = users.find((u) => u.id === deletingId);
+    if (targetUser?.role === 'admin') {
+      toast.error('Admin accounts cannot be deleted');
+      setDeletingId(null);
+      return;
+    }
     setIsDeleting(true);
     try {
       await api.delete(`/users/${deletingId}`);
@@ -279,7 +286,7 @@ export const ManageUsersPage: React.FC = () => {
               <ManageableCardOverlay
                 canManage={true}
                 onEdit={() => openEditModal(u)}
-                onDelete={() => setDeletingId(u.id)}
+                onDelete={u.role === 'admin' ? undefined : () => setDeletingId(u.id)}
               />
 
               <div>

@@ -65,8 +65,8 @@ export const ManageableGrid: React.FC<ManageableGridProps> = ({
 
 interface ManageableCardOverlayProps {
   canManage: boolean;
-  onEdit: (e: React.MouseEvent) => void;
-  onDelete: (e: React.MouseEvent) => void;
+  onEdit?: (e: React.MouseEvent) => void;
+  onDelete?: (e: React.MouseEvent) => void;
 }
 
 export const ManageableCardOverlay: React.FC<ManageableCardOverlayProps> = ({
@@ -78,28 +78,32 @@ export const ManageableCardOverlay: React.FC<ManageableCardOverlayProps> = ({
 
   return (
     <div className="absolute top-3 right-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-      <button
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          onEdit(e);
-        }}
-        className="p-2 rounded-lg bg-slate-800/80 hover:bg-sky-600 text-slate-300 hover:text-white backdrop-blur-md transition-all shadow-lg border border-slate-700/50"
-        title="Edit"
-      >
-        <Edit2 className="w-4 h-4" />
-      </button>
-      <button
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          onDelete(e);
-        }}
-        className="p-2 rounded-lg bg-slate-800/80 hover:bg-rose-600 text-slate-300 hover:text-white backdrop-blur-md transition-all shadow-lg border border-slate-700/50"
-        title="Delete"
-      >
-        <Trash2 className="w-4 h-4" />
-      </button>
+      {onEdit && (
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onEdit(e);
+          }}
+          className="p-2 rounded-lg bg-slate-800/80 hover:bg-sky-600 text-slate-300 hover:text-white backdrop-blur-md transition-all shadow-lg border border-slate-700/50"
+          title="Edit"
+        >
+          <Edit2 className="w-4 h-4" />
+        </button>
+      )}
+      {onDelete && (
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onDelete(e);
+          }}
+          className="p-2 rounded-lg bg-slate-800/80 hover:bg-rose-600 text-slate-300 hover:text-white backdrop-blur-md transition-all shadow-lg border border-slate-700/50"
+          title="Delete"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
+      )}
     </div>
   );
 };
