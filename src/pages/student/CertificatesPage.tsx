@@ -6,18 +6,16 @@ import { ManageableGrid } from '../../components/ManageableGrid';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/EmptyState';
 
-interface Registration {
+interface CertificateItem {
   id: string;
-  event: {
-    title: string;
-  };
+  event_title: string;
   achievement_position: string;
-  computed_certificate_url?: string;
-  verified_at?: string;
+  certificate_url: string;
+  issued_at?: string;
 }
 
 export const CertificatesPage: React.FC = () => {
-  const [registrations, setRegistrations] = useState<Registration[]>([]);
+  const [certificates, setCertificates] = useState<CertificateItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Admin manages certificates through Event/Registrations page now.
@@ -26,10 +24,46 @@ export const CertificatesPage: React.FC = () => {
   const fetchCertificates = async () => {
     setLoading(true);
     try {
-      const res = await api.get('/registrations/me');
-      // Filter only those verified and have a certificate link or are verified (default to pattern if applicable)
-      const verified = (res.data.items || []).filter((r: any) => r.status === 'verified' && r.computed_certificate_url);
-      setRegistrations(verified);
+      const items: CertificateItem[] = [];
+
+      // 1. Fetch issued certificates from /certificates/me
+      try {
+        const certRes = await api.get('/certificates/me');
+        const certs = Array.isArray(certRes.data) ? certRes.data : (certRes.data?.items || []);
+        certs.forEach((c: any) => {
+          items.push({
+            id: c.id,
+            event_title: c.event?.title || 'Campus Event Certificate',
+            achievement_position: c.certificate_type || 'participation',
+            certificate_url: c.file_url || `/api/certificates/${c.id}/pdf`,
+            issued_at: c.issued_at || c.issue_date,
+          });
+        });
+      } catch (e) {
+        console.warn('/certificates/me fetch skipped', e);
+      }
+
+      // 2. Fetch verified event registrations from /registrations/me
+      try {
+        const regRes = await api.get('/registrations/me');
+        const regs = Array.isArray(regRes.data) ? regRes.data : (regRes.data?.items || []);
+        regs.filter((r: any) => r.status === 'verified').forEach((r: any) => {
+          const downloadUrl = r.computed_certificate_url || `/api/certificates/verify-pdf/${r.id}`;
+          if (!items.some((existing) => existing.id === r.id)) {
+            items.push({
+              id: r.id,
+              event_title: r.event?.title || 'Verified Event Participation',
+              achievement_position: r.achievement_position || 'participation',
+              certificate_url: downloadUrl,
+              issued_at: r.verified_at || r.registered_at,
+            });
+          }
+        });
+      } catch (e) {
+        console.warn('/registrations/me fetch skipped', e);
+      }
+
+      setCertificates(items);
     } catch (err) {
       console.error('Failed to fetch certificates', err);
     } finally {
@@ -41,21 +75,24 @@ export const CertificatesPage: React.FC = () => {
     fetchCertificates();
   }, []);
 
-
   const getBadgeDetails = (type: string) => {
-    switch (type) {
-      case 'winner':
-        return { icon: Trophy, color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20' };
-      case 'runner_up':
-        return { icon: Medal, color: 'text-slate-300', bg: 'bg-slate-500/10 border-slate-500/20' };
-      default:
-        return { icon: FileCheck, color: 'text-sky-400', bg: 'bg-sky-500/10 border-sky-500/20' };
+    const t = type.toLowerCase();
+    if (t.includes('winner')) {
+      return { icon: Trophy, color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20' };
     }
+    if (t.includes('runner')) {
+      return { icon: Medal, color: 'text-slate-300', bg: 'bg-slate-500/10 border-slate-500/20' };
+    }
+    return { icon: FileCheck, color: 'text-sky-400', bg: 'bg-sky-500/10 border-sky-500/20' };
   };
 
   const handleDownload = (url?: string) => {
-    if (url) {
+    if (!url) return;
+    if (url.startsWith('http')) {
       window.open(url, '_blank');
+    } else {
+      const fullUrl = `${api.defaults.baseURL || ''}${url.startsWith('/') ? '' : '/'}${url}`;
+      window.open(fullUrl, '_blank');
     }
   };
 
@@ -85,7 +122,7 @@ export const CertificatesPage: React.FC = () => {
               </div>
             ))}
           </div>
-        ) : registrations.length === 0 ? (
+        ) : certificates.length === 0 ? (
           <EmptyState
             icon={Award}
             title="No Certificates Yet"
@@ -94,12 +131,12 @@ export const CertificatesPage: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <AnimatePresence>
-              {registrations.map((reg) => {
-                const badge = getBadgeDetails(reg.achievement_position || 'participation');
+              {certificates.map((cert) => {
+                const badge = getBadgeDetails(cert.achievement_position || 'participation');
                 const Icon = badge.icon;
                 return (
                   <motion.div
-                    key={reg.id}
+                    key={cert.id}
                     layout
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -113,20 +150,20 @@ export const CertificatesPage: React.FC = () => {
                       
                       <div>
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${badge.bg} ${badge.color}`}>
-                          {!reg.achievement_position || reg.achievement_position === 'none' ? 'participation' : reg.achievement_position.replace('_', ' ')}
+                          {!cert.achievement_position || cert.achievement_position === 'none' ? 'participation' : cert.achievement_position.replace('_', ' ')}
                         </span>
                         <h3 className="text-lg font-bold text-white mt-3 leading-tight group-hover:text-indigo-400 transition-colors">
-                          {reg.event?.title || 'Unknown Event'}
+                          {cert.event_title}
                         </h3>
                       </div>
                       
                       <p className="text-xs font-mono text-slate-500">
-                        Issued: {reg.verified_at ? new Date(reg.verified_at).toLocaleDateString() : 'N/A'}
+                        Issued: {cert.issued_at ? new Date(cert.issued_at).toLocaleDateString() : 'N/A'}
                       </p>
                     </div>
                     
                     <button
-                      onClick={() => handleDownload(reg.computed_certificate_url)}
+                      onClick={() => handleDownload(cert.certificate_url)}
                       className="mt-6 w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm transition-colors flex items-center justify-center gap-2"
                     >
                       <Download className="w-4 h-4" /> View Certificate
