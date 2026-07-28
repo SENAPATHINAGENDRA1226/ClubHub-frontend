@@ -14,7 +14,7 @@ export const ManageAlumniPage: React.FC = () => {
     try {
       setLoading(true);
       // Admin sees all (published and unpublished)
-      const res = await api.get('/alumni?limit=100&is_published=');
+      const res = await api.get('/alumni?limit=100&status=all');
       setAlumni(res.data.items || []);
     } catch (err) {
       toast.error('Failed to load alumni');

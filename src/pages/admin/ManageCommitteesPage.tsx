@@ -205,14 +205,17 @@ export const ManageCommitteesPage: React.FC = () => {
 
   const handleDelete = async () => {
     if (!deletingId) return;
+    const targetId = deletingId;
     setIsDeleting(true);
     try {
-      await api.delete(`/committees/${deletingId}`);
+      await api.delete(`/committees/${targetId}`);
       toast.success('Committee deleted');
+      setCommittees((prev) => prev.filter((c) => c.id !== targetId));
       setDeletingId(null);
       fetchCommittees();
-    } catch (err) {
-      toast.error('Failed to delete committee');
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.response?.data?.detail || 'Failed to delete committee');
     } finally {
       setIsDeleting(false);
     }

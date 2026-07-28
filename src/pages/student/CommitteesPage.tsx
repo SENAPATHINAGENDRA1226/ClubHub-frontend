@@ -3,6 +3,7 @@ import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { useRealtime } from '../../context/RealtimeContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import toast from 'react-hot-toast';
 import { Users, Mail, X, Plus } from 'lucide-react';
 import { ManageableCardOverlay, DeleteConfirmModal } from '../../components/ManageableGrid';
 import { Skeleton } from '../../components/ui/Skeleton';
@@ -143,18 +144,23 @@ export const CommitteesPage: React.FC = () => {
 
   const handleDelete = async () => {
     if (!deletingItem) return;
+    const itemToDelete = deletingItem;
     setIsSubmitting(true);
     try {
       if (deletingType === 'committee') {
-        await api.delete(`/committees/${deletingItem.id}`);
+        await api.delete(`/committees/${itemToDelete.id}`);
+        toast.success('Committee deleted');
+        setCommittees((prev) => prev.filter((c) => c.id !== itemToDelete.id));
       } else {
-        await api.delete(`/committees/members/${deletingItem.id}`);
+        await api.delete(`/committees/members/${itemToDelete.id}`);
+        toast.success('Member removed');
       }
       setIsDeleteModalOpen(false);
       setDeletingItem(null);
       fetchCommittees();
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      console.error('Delete committee error:', err);
+      toast.error(err.response?.data?.detail || 'Failed to delete item');
     } finally {
       setIsSubmitting(false);
     }
