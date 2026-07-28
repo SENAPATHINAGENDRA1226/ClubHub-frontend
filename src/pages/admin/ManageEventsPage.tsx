@@ -160,14 +160,17 @@ export const ManageEventsPage: React.FC = () => {
 
   const handleDelete = async () => {
     if (!deletingId) return;
+    const targetId = deletingId;
     setIsDeleting(true);
     try {
-      await api.delete(`/events/${deletingId}`);
+      await api.delete(`/events/${targetId}`);
       toast.success('Event deleted');
+      setEvents((prev) => prev.filter((e) => e.id !== targetId));
       setDeletingId(null);
       fetchEvents();
-    } catch (err) {
-      toast.error('Failed to delete event');
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.response?.data?.detail || 'Failed to delete event');
     } finally {
       setIsDeleting(false);
     }

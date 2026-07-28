@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../services/api';
+import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
 import { useRealtime } from '../../context/RealtimeContext';
 import { Calendar, MapPin, Clock, Users, ArrowRight, Bell, X } from 'lucide-react';
@@ -161,14 +162,18 @@ export const EventsPage: React.FC = () => {
 
   const handleDelete = async () => {
     if (!deletingEvent) return;
+    const targetId = deletingEvent.id;
     setIsSubmitting(true);
     try {
-      await api.delete(`/events/${deletingEvent.id}`);
+      await api.delete(`/events/${targetId}`);
+      toast.success('Event deleted');
+      setEvents((prev) => prev.filter((e) => e.id !== targetId));
       setIsDeleteModalOpen(false);
       setDeletingEvent(null);
       fetchEvents(activeTab, selectedYear);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      toast.error(err.response?.data?.detail || 'Failed to delete event');
     } finally {
       setIsSubmitting(false);
     }
