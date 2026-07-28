@@ -31,12 +31,25 @@ export const LoginPage: React.FC = () => {
         const res = await api.post('/auth/student/login', { email, password });
         const { access_token, refresh_token, is_first_login, onboarding_completed } = res.data;
 
-        // Fetch /me
-        const meRes = await api.get('/auth/me', {
-          headers: { Authorization: `Bearer ${access_token}` },
-        });
+        // Fetch /me with header or construct user from login payload
+        let userData = {
+          id: res.data.user_id,
+          email: res.data.email,
+          role: 'student' as UserRole,
+          is_active: true,
+          is_first_login: is_first_login ?? false,
+        };
 
-        login(access_token, refresh_token, meRes.data, 'student', onboarding_completed ?? false);
+        try {
+          const meRes = await api.get('/auth/me', {
+            headers: { Authorization: `Bearer ${access_token}` },
+          });
+          userData = meRes.data;
+        } catch (meErr) {
+          // Fallback to token payload if /auth/me fails
+        }
+
+        login(access_token, refresh_token, userData, 'student', onboarding_completed ?? false);
 
         if (is_first_login || !onboarding_completed) {
           navigate('/onboarding');
@@ -47,36 +60,63 @@ export const LoginPage: React.FC = () => {
         const res = await api.post('/auth/admin/login', { email, password });
         const { access_token, refresh_token } = res.data;
 
-        const meRes = await api.get('/auth/me', {
-          headers: { Authorization: `Bearer ${access_token}` },
-        });
+        let userData = {
+          id: res.data.user_id,
+          email: res.data.email,
+          role: 'admin' as UserRole,
+          is_active: true,
+          is_first_login: false,
+        };
 
-        login(access_token, refresh_token, meRes.data, 'admin', true);
+        try {
+          const meRes = await api.get('/auth/me', {
+            headers: { Authorization: `Bearer ${access_token}` },
+          });
+          userData = meRes.data;
+        } catch (meErr) {
+          // Fallback to token payload
+        }
+
+        login(access_token, refresh_token, userData, 'admin', true);
         navigate('/admin/dashboard');
       } else if (activeTab === 'committee') {
         const res = await api.post('/auth/committee/login', { email, password });
         const { access_token, refresh_token } = res.data;
 
-        const meRes = await api.get('/auth/me', {
-          headers: { Authorization: `Bearer ${access_token}` },
-        });
+        let userData = {
+          id: res.data.user_id,
+          email: res.data.email,
+          role: 'committee' as UserRole,
+          is_active: true,
+          is_first_login: false,
+        };
 
-        login(access_token, refresh_token, meRes.data, 'committee', true);
+        try {
+          const meRes = await api.get('/auth/me', {
+            headers: { Authorization: `Bearer ${access_token}` },
+          });
+          userData = meRes.data;
+        } catch (meErr) {
+          // Fallback to token payload
+        }
+
+        login(access_token, refresh_token, userData, 'committee', true);
         navigate('/admin/dashboard');
       }
     } catch (err: any) {
       if (err.response) {
+        const status = err.response.status;
         const errData = err.response.data;
         const detailStr = typeof errData.detail === 'string' ? errData.detail : JSON.stringify(errData.detail);
-        
+
         if (
-          err.response.status === 404 ||
+          status === 404 ||
           errData.code === 'ACCOUNT_NOT_FOUND' ||
           detailStr?.includes('ACCOUNT_NOT_FOUND')
         ) {
           setPopupModal('ACCOUNT_NOT_FOUND');
         } else if (
-          err.response.status === 401 ||
+          status === 401 ||
           errData.code === 'INVALID_CREDENTIALS' ||
           detailStr?.includes('INVALID_CREDENTIALS') ||
           detailStr?.includes('Invalid')
