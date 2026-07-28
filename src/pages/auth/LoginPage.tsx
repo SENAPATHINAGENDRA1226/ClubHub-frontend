@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import { UserRole } from '../../types/auth';
-import { Award, CheckCircle2, Lock, Mail, QrCode, Shield, Sparkles, UserCheck, Users } from 'lucide-react';
+import { Award, Lock, Mail, QrCode, Shield, Sparkles, UserCheck, Users, AlertTriangle, UserX, ArrowRight } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -13,20 +14,17 @@ export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [showSignupPrompt, setShowSignupPrompt] = useState(false);
+  const [popupModal, setPopupModal] = useState<'ACCOUNT_NOT_FOUND' | 'INVALID_CREDENTIALS' | null>(null);
 
   const handleTabChange = (tab: UserRole) => {
     setActiveTab(tab);
-    setErrorMsg(null);
-    setShowSignupPrompt(false);
+    setPopupModal(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setErrorMsg(null);
-    setShowSignupPrompt(false);
+    setPopupModal(null);
 
     try {
       if (activeTab === 'student') {
@@ -69,16 +67,26 @@ export const LoginPage: React.FC = () => {
     } catch (err: any) {
       if (err.response) {
         const errData = err.response.data;
+        const detailStr = typeof errData.detail === 'string' ? errData.detail : JSON.stringify(errData.detail);
+        
         if (
-          err.response.status === 404 &&
-          (errData.code === 'ACCOUNT_NOT_FOUND' || errData.detail?.includes('ACCOUNT_NOT_FOUND'))
+          err.response.status === 404 ||
+          errData.code === 'ACCOUNT_NOT_FOUND' ||
+          detailStr?.includes('ACCOUNT_NOT_FOUND')
         ) {
-          setShowSignupPrompt(true);
+          setPopupModal('ACCOUNT_NOT_FOUND');
+        } else if (
+          err.response.status === 401 ||
+          errData.code === 'INVALID_CREDENTIALS' ||
+          detailStr?.includes('INVALID_CREDENTIALS') ||
+          detailStr?.includes('Invalid')
+        ) {
+          setPopupModal('INVALID_CREDENTIALS');
         } else {
-          setErrorMsg(errData.detail || 'Invalid email or password. Please try again.');
+          setPopupModal('INVALID_CREDENTIALS');
         }
       } else {
-        setErrorMsg('Network error. Unable to connect to backend server.');
+        setPopupModal('INVALID_CREDENTIALS');
       }
     } finally {
       setLoading(false);
@@ -217,33 +225,6 @@ export const LoginPage: React.FC = () => {
 
           {/* Main Card Container */}
           <div className="bg-slate-900/90 border border-slate-800 p-8 rounded-3xl shadow-2xl backdrop-blur-xl space-y-6">
-            {/* Error Message Banner */}
-            {errorMsg && (
-              <div className="p-4 rounded-xl bg-rose-950/80 border border-rose-800/60 text-rose-200 text-xs flex items-start gap-3">
-                <span className="w-2 h-2 rounded-full bg-rose-400 mt-1 shrink-0"></span>
-                <span>{errorMsg}</span>
-              </div>
-            )}
-
-            {/* ACCOUNT_NOT_FOUND Inline Redirection Banner */}
-            {showSignupPrompt && (
-              <div className="p-4 rounded-xl bg-amber-950/80 border border-amber-700/60 text-amber-200 space-y-3">
-                <div className="flex items-start gap-2.5">
-                  <Mail className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-                  <p className="text-xs leading-relaxed">
-                    No student account found for <strong className="text-white">{email}</strong>. Want to sign up instead?
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => navigate(`/signup?email=${encodeURIComponent(email)}`)}
-                  className="w-full py-2 px-3 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold transition-all shadow-md flex items-center justify-center gap-2"
-                >
-                  <CheckCircle2 className="w-4 h-4" />
-                  Sign up with this email
-                </button>
-              </div>
-            )}
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -320,6 +301,78 @@ export const LoginPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Popup Modal for Account Not Found & Invalid Credentials */}
+      <AnimatePresence>
+        {popupModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md" onClick={() => setPopupModal(null)}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {popupModal === 'ACCOUNT_NOT_FOUND' ? (
+                <div className="text-center space-y-5">
+                  <div className="w-16 h-16 rounded-3xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto shadow-lg shadow-amber-500/10">
+                    <UserX className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black text-white">Account Not Found</h3>
+                    <p className="text-sm text-slate-400 mt-2 leading-relaxed">
+                      No registered account was found for <strong className="text-sky-400">{email}</strong>. Please sign up to create your account.
+                    </p>
+                  </div>
+
+                  <div className="space-y-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPopupModal(null);
+                        navigate(`/signup?email=${encodeURIComponent(email)}`);
+                      }}
+                      className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-extrabold text-sm transition-all shadow-lg shadow-sky-600/30 flex items-center justify-center gap-2"
+                    >
+                      Sign Up Now <ArrowRight className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPopupModal(null)}
+                      className="w-full py-3 px-4 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-colors"
+                    >
+                      Try Another Email
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center space-y-5">
+                  <div className="w-16 h-16 rounded-3xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mx-auto shadow-lg shadow-rose-500/10">
+                    <AlertTriangle className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black text-white">Invalid Credentials</h3>
+                    <p className="text-sm text-slate-400 mt-2 leading-relaxed">
+                      The password or email address you entered is incorrect. Please check your details and try again.
+                    </p>
+                  </div>
+
+                  <div className="pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setPopupModal(null)}
+                      className="w-full py-3.5 px-4 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-sm transition-all shadow-lg shadow-rose-600/30"
+                    >
+                      Try Again
+                    </button>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
