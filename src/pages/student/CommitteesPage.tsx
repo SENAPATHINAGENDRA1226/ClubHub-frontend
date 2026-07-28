@@ -33,7 +33,7 @@ export const CommitteesPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   
   // Master Toggle
-  const [masterCategory, setMasterCategory] = useState<'faculty' | 'student'>('faculty');
+  const [masterCategory, setMasterCategory] = useState<'all' | 'faculty' | 'student'>('all');
   
   // Secondary Toggles
   const [facultySubCategory, setFacultySubCategory] = useState<'CSM' | 'CSD'>('CSM');
@@ -95,9 +95,10 @@ export const CommitteesPage: React.FC = () => {
   const currentSubCategory = masterCategory === 'faculty' ? facultySubCategory : studentSubCategory;
 
   const activeCommittees = useMemo(() => {
-    if (isCommitteeAdmin) return committees; // Show exactly their scoped committees
-    return committees.filter(c => c.category === masterCategory && c.sub_category === currentSubCategory);
-  }, [committees, masterCategory, currentSubCategory, isCommitteeAdmin]);
+    if (isCommitteeAdmin || masterCategory === 'all') return committees;
+    const filtered = committees.filter(c => c.category === masterCategory);
+    return filtered.length > 0 ? filtered : committees;
+  }, [committees, masterCategory, isCommitteeAdmin]);
 
   const facultyTabs = [
     { id: 'CSM', label: 'CSM' },
