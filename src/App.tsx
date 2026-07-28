@@ -17,6 +17,8 @@ import {
   ManageCommitteesPage,
   ManageAlumniPage,
   ManageGrievancesPage,
+  ManageMediaPage,
+  ManageAchievementsPage,
   AdminSettingsPage
 } from './pages/admin';
 import { 
@@ -243,6 +245,22 @@ export const App: React.FC = () => {
                 element={
                   <ProtectedRoute allowedRoles={['admin', 'committee']}>
                     <ManageGrievancesPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/media"
+                element={
+                  <ProtectedRoute allowedRoles={['admin', 'committee']}>
+                    <ManageMediaPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/achievements"
+                element={
+                  <ProtectedRoute allowedRoles={['admin', 'committee']}>
+                    <ManageAchievementsPage />
                   </ProtectedRoute>
                 }
               />

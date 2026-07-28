@@ -6,4 +6,6 @@ export * from './ManageCertificatesPage';
 export * from './ManageCommitteesPage';
 export * from './ManageAlumniPage';
 export * from './ManageGrievancesPage';
+export * from './ManageMediaPage';
+export * from './ManageAchievementsPage';
 export * from './AdminSettingsPage';

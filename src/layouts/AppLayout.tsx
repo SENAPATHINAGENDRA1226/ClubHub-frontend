@@ -46,9 +46,11 @@ const adminNavItems = [
   { name: 'Manage Events', path: '/admin/events', icon: Calendar, allowedRoles: ['admin', 'committee'] },
   { name: 'Manage Users', path: '/admin/users', icon: Users, allowedRoles: ['admin'] },
   { name: 'Manage Committees', path: '/admin/committees', icon: Users, allowedRoles: ['admin'] },
-  { name: 'Manage Alumni', path: '/admin/alumni', icon: GraduationCap, allowedRoles: ['admin'] },
+  { name: 'Manage Alumni', path: '/admin/alumni', icon: GraduationCap, allowedRoles: ['admin', 'committee'] },
   { name: 'Manage Certificates', path: '/admin/certificates', icon: Award, allowedRoles: ['admin'] },
   { name: 'Manage Grievances', path: '/admin/grievances', icon: MessageSquareWarning, allowedRoles: ['admin', 'committee'] },
+  { name: 'Manage Media', path: '/admin/media', icon: ImageIcon, allowedRoles: ['admin', 'committee'] },
+  { name: 'Manage Achievements', path: '/admin/achievements', icon: Trophy, allowedRoles: ['admin', 'committee'] },
   { name: 'QR Verification', path: '/admin/verify', icon: QrCode, allowedRoles: ['admin', 'committee'] },
   { name: 'Settings', path: '/admin/settings', icon: Settings, allowedRoles: ['admin'] },
 ];
