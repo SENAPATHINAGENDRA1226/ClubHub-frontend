@@ -85,20 +85,27 @@ export const ManageCertificatesPage: React.FC = () => {
       setLoading(true);
       // Fetch certificates
       const certRes = await api.get('/certificates?limit=200');
-      // Set certificates (handling paginated wrapper items)
-      const certList = certRes.data.items || [];
+      const certList = certRes.data?.items || (Array.isArray(certRes.data) ? certRes.data : []);
 
       // Fetch students list (using user endpoint)
       const studentRes = await api.get('/users?role=student&limit=200');
-      setStudents(studentRes.data.items || []);
+      const studentList = studentRes.data?.items || (Array.isArray(studentRes.data) ? studentRes.data : []);
+      setStudents(studentList);
 
-      // Fetch events
-      const eventRes = await api.get('/events');
-      setEvents(eventRes.data || []);
+      // Fetch events (using admin endpoint to load all past, current & inactive events)
+      let eventList: Event[] = [];
+      try {
+        const eventRes = await api.get('/events/admin?limit=500&sort_by=event_date&sort_dir=desc');
+        eventList = eventRes.data?.items || (Array.isArray(eventRes.data) ? eventRes.data : []);
+      } catch (e) {
+        const eventRes = await api.get('/events?limit=500');
+        eventList = eventRes.data?.items || (Array.isArray(eventRes.data) ? eventRes.data : []);
+      }
+      setEvents(eventList);
 
-      // Since certificates backend schema is small, let's map student details locally for cleaner UI
+      // Map student details locally for cleaner UI
       const enrichedCerts = certList.map((c: any) => {
-        const matchingUser = (studentRes.data.items || []).find((s: any) => s.id === c.student_id || s.profile?.id === c.student_id);
+        const matchingUser = studentList.find((s: any) => s.id === c.student_id || s.profile?.id === c.student_id);
         return {
           ...c,
           student: {
