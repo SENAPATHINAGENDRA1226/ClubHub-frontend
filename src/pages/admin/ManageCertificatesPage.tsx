@@ -24,6 +24,7 @@ interface Student {
   id: string;
   email: string;
   profile?: {
+    id?: string;
     full_name?: string;
     branch?: string;
     academic_year?: string;
@@ -495,23 +496,6 @@ export const ManageCertificatesPage: React.FC = () => {
 
               <form onSubmit={handleIssueSubmit} className="space-y-5">
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Student *</label>
-                  <select
-                    required
-                    value={formData.student_id}
-                    onChange={(e) => setFormData({ ...formData, student_id: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-sky-500"
-                  >
-                    <option value="">-- Select Student Profile --</option>
-                    {students.map((std) => (
-                      <option key={std.id} value={std.id}>
-                        {std.profile?.full_name || std.email} ({std.profile?.branch || 'Student'})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
                   <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Event *</label>
                   <select
                     required
@@ -525,6 +509,26 @@ export const ManageCertificatesPage: React.FC = () => {
                         {ev.title} ({ev.event_year})
                       </option>
                     ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Student *</label>
+                  <select
+                    required
+                    value={formData.student_id}
+                    onChange={(e) => setFormData({ ...formData, student_id: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-sky-500"
+                  >
+                    <option value="">-- Select Student Profile --</option>
+                    {students.map((std) => {
+                      const val = std.profile?.id || std.id;
+                      return (
+                        <option key={std.id} value={val}>
+                          {std.profile?.full_name || std.email} ({std.profile?.branch || 'Student'})
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
 

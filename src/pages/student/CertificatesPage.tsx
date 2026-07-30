@@ -35,7 +35,7 @@ export const CertificatesPage: React.FC = () => {
             id: c.id,
             event_title: c.event?.title || 'Campus Event Certificate',
             achievement_position: c.certificate_type || 'participation',
-            certificate_url: c.file_url || `/api/certificates/${c.id}/pdf`,
+            certificate_url: c.file_url || `/api/certificates/${c.id}/download`,
             issued_at: c.issued_at || c.issue_date,
           });
         });
