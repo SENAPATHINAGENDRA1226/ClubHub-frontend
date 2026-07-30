@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { RealtimeProvider } from './context/RealtimeContext';
+import { ThemeProvider } from './context/ThemeContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { LoginPage } from './pages/auth/LoginPage';
 import { SignupPage } from './pages/auth/SignupPage';
@@ -65,7 +66,8 @@ const HomeRedirect: React.FC = () => {
 export const App: React.FC = () => {
   return (
     <AuthProvider>
-      <RealtimeProvider>
+      <ThemeProvider>
+        <RealtimeProvider>
         <Router>
           <Routes>
             <Route path="/" element={<HomeRedirect />} />
@@ -313,7 +315,8 @@ export const App: React.FC = () => {
           </Routes>
         </Router>
       </RealtimeProvider>
-    </AuthProvider>
+    </ThemeProvider>
+  </AuthProvider>
   );
 };
 

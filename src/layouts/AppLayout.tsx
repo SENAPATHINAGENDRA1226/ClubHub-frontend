@@ -20,10 +20,13 @@ import {
   Menu,
   X,
   Settings,
-  QrCode
+  QrCode,
+  Sun,
+  Moon
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import { useRealtime } from '../context/RealtimeContext';
+import { useTheme } from '../context/ThemeContext';
 
 const studentNavItems = [
   { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
@@ -58,6 +61,7 @@ const adminNavItems = [
 export const AppLayout: React.FC = () => {
   const { user, logout, role } = useAuth();
   const { subscribe } = useRealtime();
+  const { theme, toggleTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
@@ -201,7 +205,26 @@ export const AppLayout: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            {/* Theme Toggle Button */}
+            <button
+              onClick={toggleTheme}
+              className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all border border-slate-700 flex items-center gap-2 text-xs font-semibold shadow-md"
+              title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {theme === 'dark' ? (
+                <>
+                  <Sun className="w-4 h-4 text-amber-400" />
+                  <span className="hidden md:inline text-amber-400">Light Mode</span>
+                </>
+              ) : (
+                <>
+                  <Moon className="w-4 h-4 text-indigo-500" />
+                  <span className="hidden md:inline text-indigo-600">Dark Mode</span>
+                </>
+              )}
+            </button>
+
             <div className="text-right hidden sm:block">
               <span className="block text-sm font-bold text-white">
                 {user?.profile?.full_name || user?.email}
