@@ -393,7 +393,7 @@ export const ManageUsersPage: React.FC = () => {
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="user@clubhub.com"
+                    placeholder="user@csmd-dlides-club.com"
                     className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-sky-500"
                   />
                 </div>

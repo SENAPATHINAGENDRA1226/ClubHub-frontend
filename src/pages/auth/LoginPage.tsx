@@ -147,7 +147,7 @@ export const LoginPage: React.FC = () => {
             <Sparkles className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-2xl font-black tracking-tight text-white">ClubHub</span>
+            <span className="text-2xl font-black tracking-tight text-white">CSMD DLIDES CLUB</span>
             <span className="block text-xs font-semibold text-sky-400 uppercase tracking-widest">Campus Community</span>
           </div>
         </div>
@@ -201,7 +201,7 @@ export const LoginPage: React.FC = () => {
 
         {/* Footer info */}
         <div className="relative z-10 flex items-center justify-between text-xs text-slate-500 border-t border-slate-800/60 pt-6">
-          <span>&copy; 2026 ClubHub Platform</span>
+          <span>&copy; 2026 CSMD DLIDES CLUB Platform</span>
           <span className="font-mono text-slate-400">v1.0.0 Stable</span>
         </div>
       </div>
@@ -215,7 +215,7 @@ export const LoginPage: React.FC = () => {
               <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-sky-500 text-white">
                 <Sparkles className="w-5 h-5" />
               </div>
-              <span className="text-2xl font-extrabold text-white">ClubHub</span>
+              <span className="text-2xl font-extrabold text-white">CSMD DLIDES CLUB</span>
             </div>
             <h2 className="text-3xl font-extrabold tracking-tight text-white">Welcome back</h2>
             <p className="text-sm text-slate-400">Select your access role to sign in</p>
@@ -283,9 +283,9 @@ export const LoginPage: React.FC = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder={
                       activeTab === 'admin'
-                        ? 'admin@clubhub.com'
+                        ? 'admin@csmd-dlides-club.com'
                         : activeTab === 'committee'
-                        ? 'committee@clubhub.com'
+                        ? 'committee@csmd-dlides-club.com'
                         : 'student@example.com'
                     }
                     className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all"

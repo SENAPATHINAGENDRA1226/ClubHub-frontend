@@ -50,10 +50,10 @@ export const AdminSettingsPage: React.FC = () => {
   
   // Settings States
   const [profile, setProfile] = useState<ClubProfile>({
-    club_name: 'ClubHub',
+    club_name: 'CSMD DLIDES CLUB',
     tagline: 'Where builders meet.',
     logo_url: null,
-    footer_text: '© 2026 ClubHub. All rights reserved.',
+    footer_text: '© 2026 CSMD DLIDES CLUB. All rights reserved.',
   });
 
   const [notifications, setNotifications] = useState<NotificationPrefs>({

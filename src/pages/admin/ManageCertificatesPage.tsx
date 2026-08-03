@@ -110,7 +110,7 @@ export const ManageCertificatesPage: React.FC = () => {
           ...c,
           student: {
             full_name: matchingUser?.profile?.full_name || 'Student Profile',
-            email: matchingUser?.email || 'student@clubhub.com',
+            email: matchingUser?.email || 'student@csmd-dlides-club.com',
           }
         };
       });

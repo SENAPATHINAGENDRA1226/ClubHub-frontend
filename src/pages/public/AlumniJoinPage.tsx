@@ -65,7 +65,7 @@ export const AlumniJoinPage: React.FC = () => {
             <Sparkles className="w-10 h-10 text-emerald-400" />
           </div>
           <h1 className="text-2xl font-black mb-4">Profile Submitted!</h1>
-          <p className="text-slate-400 mb-8 leading-relaxed">Thank you for joining the ClubHub Alumni Network! Your profile is currently under review by our administrators and will be published shortly.</p>
+          <p className="text-slate-400 mb-8 leading-relaxed">Thank you for joining the CSMD DLIDES CLUB Alumni Network! Your profile is currently under review by our administrators and will be published shortly.</p>
           <button 
             onClick={() => navigate('/login')}
             className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold transition-colors w-full"

@@ -101,7 +101,7 @@ export const OnboardingPage: React.FC = () => {
             <Sparkles className="w-3.5 h-3.5" />
             Complete Student Onboarding
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-white">Welcome to ClubHub</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight text-white">Welcome to CSMD DLIDES CLUB</h1>
           <p className="text-sm text-slate-400 max-w-md mx-auto">
             Set up your academic profile to unlock event registrations and certificate issuance.
           </p>

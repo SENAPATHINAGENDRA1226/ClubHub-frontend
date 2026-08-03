@@ -77,7 +77,7 @@ export const SignupPage: React.FC = () => {
             <Sparkles className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-2xl font-black tracking-tight text-white">ClubHub</span>
+            <span className="text-2xl font-black tracking-tight text-white">CSMD DLIDES CLUB</span>
             <span className="block text-xs font-semibold text-sky-400 uppercase tracking-widest">Campus Community</span>
           </div>
         </div>
@@ -97,7 +97,7 @@ export const SignupPage: React.FC = () => {
         </div>
 
         <div className="relative z-10 flex items-center justify-between text-xs text-slate-500 border-t border-slate-800/60 pt-6">
-          <span>&copy; 2026 ClubHub Platform</span>
+          <span>&copy; 2026 CSMD DLIDES CLUB Platform</span>
           <span className="font-mono text-slate-400">v1.0.0 Stable</span>
         </div>
       </div>

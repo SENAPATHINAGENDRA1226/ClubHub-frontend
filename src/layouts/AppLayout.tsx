@@ -129,7 +129,7 @@ export const AppLayout: React.FC = () => {
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-xl font-black text-white leading-tight">ClubHub</h1>
+              <h1 className="text-xl font-black text-white leading-tight">CSMD DLIDES CLUB</h1>
               <p className="text-[10px] text-sky-400 font-bold tracking-widest uppercase">Campus</p>
             </div>
           </div>
