@@ -115,7 +115,7 @@ export const App: React.FC = () => {
               <Route
                 path="/events"
                 element={
-                  <ProtectedRoute allowedRoles={['student']}>
+                  <ProtectedRoute allowedRoles={['student', 'admin', 'committee']}>
                     <EventsPage />
                   </ProtectedRoute>
                 }
@@ -139,7 +139,7 @@ export const App: React.FC = () => {
               <Route
                 path="/resources"
                 element={
-                  <ProtectedRoute allowedRoles={['student']}>
+                  <ProtectedRoute allowedRoles={['student', 'admin', 'committee']}>
                     <ResourcesPage />
                   </ProtectedRoute>
                 }
@@ -147,7 +147,7 @@ export const App: React.FC = () => {
               <Route
                 path="/opportunities"
                 element={
-                  <ProtectedRoute allowedRoles={['student']}>
+                  <ProtectedRoute allowedRoles={['student', 'admin', 'committee']}>
                     <OpportunitiesPage />
                   </ProtectedRoute>
                 }
@@ -155,7 +155,7 @@ export const App: React.FC = () => {
               <Route
                 path="/committees"
                 element={
-                  <ProtectedRoute allowedRoles={['student']}>
+                  <ProtectedRoute allowedRoles={['student', 'admin', 'committee']}>
                     <CommitteesPage />
                   </ProtectedRoute>
                 }
@@ -163,7 +163,7 @@ export const App: React.FC = () => {
               <Route
                 path="/alumni"
                 element={
-                  <ProtectedRoute allowedRoles={['student']}>
+                  <ProtectedRoute allowedRoles={['student', 'admin', 'committee']}>
                     <AlumniAchievementsPage />
                   </ProtectedRoute>
                 }
@@ -171,7 +171,7 @@ export const App: React.FC = () => {
               <Route
                 path="/achievements"
                 element={
-                  <ProtectedRoute allowedRoles={['student']}>
+                  <ProtectedRoute allowedRoles={['student', 'admin', 'committee']}>
                     <AlumniAchievementsPage />
                   </ProtectedRoute>
                 }
@@ -179,7 +179,7 @@ export const App: React.FC = () => {
               <Route
                 path="/alumni-achievements"
                 element={
-                  <ProtectedRoute allowedRoles={['student']}>
+                  <ProtectedRoute allowedRoles={['student', 'admin', 'committee']}>
                     <AlumniAchievementsPage />
                   </ProtectedRoute>
                 }
@@ -187,7 +187,7 @@ export const App: React.FC = () => {
               <Route
                 path="/media"
                 element={
-                  <ProtectedRoute allowedRoles={['student']}>
+                  <ProtectedRoute allowedRoles={['student', 'admin', 'committee']}>
                     <MediaPage />
                   </ProtectedRoute>
                 }

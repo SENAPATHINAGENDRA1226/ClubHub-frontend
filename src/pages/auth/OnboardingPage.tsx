@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import api from '../../services/api';
+import api, { getErrorMessage } from '../../services/api';
 import {
   ArrowLeft,
   ArrowRight,
@@ -32,12 +32,99 @@ export const OnboardingPage: React.FC = () => {
   const [githubUrl, setGithubUrl] = useState('');
   const [instagramUrl, setInstagramUrl] = useState('');
 
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    
+    if (val === '') {
+      setPhoneNumber('');
+      return;
+    }
+
+    // Keep only '+' and digits
+    let sanitized = val.replace(/[^\d+]/g, '');
+
+    // If user starts typing digit, prepend +91
+    if (sanitized && !sanitized.startsWith('+')) {
+      if (sanitized.startsWith('91')) {
+        sanitized = '+' + sanitized;
+      } else {
+        sanitized = '+91' + sanitized;
+      }
+    }
+
+    // Ensure it always has +91 when typing if it starts with +
+    if (sanitized.startsWith('+') && !sanitized.startsWith('+91')) {
+      if (sanitized.length >= 3) {
+        sanitized = '+91' + sanitized.substring(3);
+      }
+    }
+
+    // Limit to 13 characters max
+    if (sanitized.length <= 13) {
+      setPhoneNumber(sanitized);
+    }
+  };
+
+  const handleCgpaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value;
+
+    // Remove any character that is not a digit or a dot
+    val = val.replace(/[^\d.]/g, '');
+
+    // Allow at most one dot
+    const dots = val.split('.');
+    if (dots.length > 2) {
+      val = dots[0] + '.' + dots.slice(1).join('');
+    }
+
+    // Split into integer and decimal parts
+    if (val.includes('.')) {
+      let [integerPart, decimalPart] = val.split('.');
+      if (integerPart.length > 2) {
+        integerPart = integerPart.slice(0, 2);
+      }
+      if (decimalPart.length > 2) {
+        decimalPart = decimalPart.slice(0, 2);
+      }
+      val = integerPart + '.' + decimalPart;
+    } else {
+      // If no dot, limit to 2 digits.
+      // If the user types a 3rd digit, automatically insert dot
+      if (val.length > 2) {
+        val = val.slice(0, 2) + '.' + val.slice(2, 3);
+      }
+    }
+
+    if (val.length <= 5) {
+      setCgpa(val);
+    }
+  };
+
   const nextStep = () => {
     setErrorMsg(null);
     if (step === 1) {
       if (!phoneNumber.trim()) {
         setErrorMsg('Please enter a valid phone number.');
         return;
+      }
+      const phoneRegex = /^\+91\d{10}$/;
+      if (!phoneRegex.test(phoneNumber)) {
+        setErrorMsg('Phone number must start with +91 followed by exactly 10 digits (e.g. +919876543210).');
+        return;
+      }
+    }
+    if (step === 2) {
+      if (cgpa) {
+        const cgpaRegex = /^\d{2}\.\d{2}$/;
+        if (!cgpaRegex.test(cgpa)) {
+          setErrorMsg('CGPA must be in xx.xx format (e.g. 08.75 or 10.00).');
+          return;
+        }
+        const parsed = parseFloat(cgpa);
+        if (isNaN(parsed) || parsed < 0 || parsed > 10) {
+          setErrorMsg('CGPA must be between 00.00 and 10.00.');
+          return;
+        }
       }
     }
     setStep((prev) => Math.min(prev + 1, 3));
@@ -52,6 +139,32 @@ export const OnboardingPage: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     setErrorMsg(null);
+
+    // Final checks
+    const phoneRegex = /^\+91\d{10}$/;
+    if (!phoneRegex.test(phoneNumber)) {
+      setErrorMsg('Phone number must start with +91 followed by exactly 10 digits.');
+      setLoading(false);
+      setStep(1);
+      return;
+    }
+
+    if (cgpa) {
+      const cgpaRegex = /^\d{2}\.\d{2}$/;
+      if (!cgpaRegex.test(cgpa)) {
+        setErrorMsg('CGPA must be in xx.xx format (e.g. 08.75 or 10.00).');
+        setLoading(false);
+        setStep(2);
+        return;
+      }
+      const parsed = parseFloat(cgpa);
+      if (isNaN(parsed) || parsed < 0 || parsed > 10) {
+        setErrorMsg('CGPA must be between 00.00 and 10.00.');
+        setLoading(false);
+        setStep(2);
+        return;
+      }
+    }
 
     try {
       const payload = {
@@ -79,11 +192,7 @@ export const OnboardingPage: React.FC = () => {
       setOnboardingCompleted(true);
       navigate('/dashboard');
     } catch (err: any) {
-      if (err.response && err.response.data) {
-        setErrorMsg(err.response.data.detail || 'Onboarding submission failed.');
-      } else {
-        setErrorMsg('Network error. Unable to save profile.');
-      }
+      setErrorMsg(getErrorMessage(err, 'Onboarding submission failed.'));
     } finally {
       setLoading(false);
     }
@@ -234,11 +343,14 @@ export const OnboardingPage: React.FC = () => {
                       type="tel"
                       required
                       value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value)}
-                      placeholder="9876543210"
+                      onChange={handlePhoneChange}
+                      placeholder="+919876543210"
                       className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all"
                     />
                   </div>
+                  <p className="text-[11px] text-slate-500 mt-1">
+                    Must start with +91 followed by exactly 10 digits.
+                  </p>
                 </div>
               </div>
             </div>
@@ -256,18 +368,15 @@ export const OnboardingPage: React.FC = () => {
                     <Award className="w-4 h-4" />
                   </div>
                   <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    max="10"
+                    type="text"
                     value={cgpa}
-                    onChange={(e) => setCgpa(e.target.value)}
-                    placeholder="e.g. 8.75"
+                    onChange={handleCgpaChange}
+                    placeholder="e.g. 08.75 or 10.00"
                     className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all"
                   />
                 </div>
                 <p className="text-[11px] text-slate-500 mt-1">
-                  Optional CGPA for academic scholarship eligibility and technical club placement drives.
+                  Must be in xx.xx format (e.g. 08.75 or 10.00) between 00.00 and 10.00.
                 </p>
               </div>
             </div>

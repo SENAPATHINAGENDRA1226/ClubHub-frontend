@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import api from '../../services/api';
+import api, { getErrorMessage } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { useRealtime } from '../../context/RealtimeContext';
 import { CheckCircle2, Ticket, AlertCircle, Calendar, MapPin, Clock } from 'lucide-react';
@@ -95,7 +95,7 @@ export const RegistrationsPage: React.FC = () => {
       const regRes = await api.get('/registrations/me');
       setPastRegistrations(regRes.data.items || []);
     } catch (err: any) {
-      setErrorMsg(err.response?.data?.detail || 'Registration failed');
+      setErrorMsg(getErrorMessage(err, 'Registration failed'));
     } finally {
       setSubmitting(false);
     }

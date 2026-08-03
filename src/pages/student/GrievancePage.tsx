@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import api from '../../services/api';
+import api, { getErrorMessage } from '../../services/api';
 import { useRealtime } from '../../context/RealtimeContext';
 import { MessageSquareWarning, CheckCircle2, AlertCircle, Clock, Send } from 'lucide-react';
 import { Skeleton } from '../../components/ui/Skeleton';
@@ -12,7 +12,7 @@ export const GrievancePage: React.FC = () => {
   // Student State
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
-  const [category, setCategory] = useState('general');
+  const [category, setCategory] = useState('other');
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -47,11 +47,11 @@ export const GrievancePage: React.FC = () => {
       setSuccessMsg('Grievance submitted successfully. We will look into it shortly.');
       setSubject('');
       setMessage('');
-      setCategory('general');
+      setCategory('other');
       setIsAnonymous(false);
       fetchGrievances();
     } catch (err: any) {
-      setErrorMsg(err.response?.data?.detail || 'Failed to submit grievance');
+      setErrorMsg(getErrorMessage(err, 'Failed to submit grievance'));
     } finally {
       setSubmitting(false);
     }
@@ -149,11 +149,10 @@ export const GrievancePage: React.FC = () => {
                 onChange={e => setCategory(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-rose-500 transition-colors"
               >
-                <option value="general">General</option>
-                <option value="academics">Academics</option>
-                <option value="facilities">Facilities</option>
-                <option value="harassment">Harassment / Code of Conduct</option>
                 <option value="other">Other</option>
+                <option value="event">Event</option>
+                <option value="committee">Committee</option>
+                <option value="facility">Facilities</option>
               </select>
             </div>
             

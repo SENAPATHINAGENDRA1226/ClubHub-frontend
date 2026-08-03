@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import api from '../../services/api';
+import api, { getErrorMessage } from '../../services/api';
 import { Lock, Mail, Sparkles, User, UserCheck } from 'lucide-react';
 
 export const SignupPage: React.FC = () => {
@@ -55,11 +55,7 @@ export const SignupPage: React.FC = () => {
       login(access_token, refresh_token, meRes.data, 'student', false);
       navigate('/onboarding');
     } catch (err: any) {
-      if (err.response && err.response.data) {
-        setErrorMsg(err.response.data.detail || 'Signup failed. Please try again.');
-      } else {
-        setErrorMsg('Network error. Unable to connect to backend server.');
-      }
+      setErrorMsg(getErrorMessage(err, 'Signup failed. Please try again.'));
     } finally {
       setLoading(false);
     }

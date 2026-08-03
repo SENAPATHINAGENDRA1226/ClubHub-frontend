@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import api from '../../services/api';
+import api, { getErrorMessage } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { useRealtime } from '../../context/RealtimeContext';
 import { Send, CheckCircle2, AlertCircle, MessageSquare, MailOpen, Mail } from 'lucide-react';
@@ -70,7 +70,7 @@ export const ContactUsPage: React.FC = () => {
         message: ''
       });
     } catch (err: any) {
-      setErrorMsg(err.response?.data?.detail || 'Failed to send message');
+      setErrorMsg(getErrorMessage(err, 'Failed to send message'));
     } finally {
       setSubmitting(false);
     }
