@@ -3,6 +3,43 @@ import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import { Mail, Phone, BookOpen, GraduationCap, Github, Linkedin, Instagram, Settings, Save, X, Ticket, CheckCircle2 } from 'lucide-react';
 
+const formatExternalUrl = (url: string, defaultDomain: string) => {
+  if (!url) return '';
+  const cleanUrl = url.trim();
+  if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://')) {
+    return cleanUrl;
+  }
+  if (cleanUrl.startsWith('@')) {
+    return `https://${defaultDomain}/${cleanUrl.substring(1)}`;
+  }
+  if (!cleanUrl.includes('.') && !cleanUrl.includes('/')) {
+    if (defaultDomain === 'linkedin.com') {
+      return `https://${defaultDomain}/in/${cleanUrl}`;
+    }
+    return `https://${defaultDomain}/${cleanUrl}`;
+  }
+  return `https://${cleanUrl}`;
+};
+
+const getUrlDisplayText = (url: string, defaultDomain: string) => {
+  if (!url) return '';
+  let clean = url.trim();
+  if (clean.startsWith('@')) {
+    return `${defaultDomain}/${clean.substring(1)}`;
+  }
+  if (!clean.includes('.') && !clean.includes('/')) {
+    if (defaultDomain === 'linkedin.com') {
+      return `${defaultDomain}/in/${clean}`;
+    }
+    return `${defaultDomain}/${clean}`;
+  }
+  // Strip http:// or https:// and www.
+  clean = clean.replace(/^(https?:\/\/)?(www\.)?/, '');
+  // Strip trailing slashes
+  clean = clean.replace(/\/$/, '');
+  return clean;
+};
+
 export const ProfilePage: React.FC = () => {
   const { user, login } = useAuth(); // Need to call auth /me again to update context or just rely on local state
   const [isEditing, setIsEditing] = useState(false);
@@ -46,6 +83,22 @@ export const ProfilePage: React.FC = () => {
     };
     fetchRegistrations();
   }, []);
+
+  useEffect(() => {
+    if (user?.profile) {
+      setFormData({
+        name: user.profile.full_name || '',
+        branch: user.profile.branch || '',
+        section: user.profile.section || '',
+        phone_number: user.profile.phone_number || '',
+        academic_year: user.profile.academic_year || '',
+        cgpa: user.profile.cgpa?.toString() || '',
+        linkedin_url: user.profile.linkedin_url || '',
+        github_url: user.profile.github_url || '',
+        instagram_url: user.profile.instagram_url || '',
+      });
+    }
+  }, [user]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -93,7 +146,22 @@ export const ProfilePage: React.FC = () => {
         <h1 className="text-3xl font-black text-white tracking-tight">My Profile</h1>
         {!isEditing && (
           <button
-            onClick={() => setIsEditing(true)}
+            onClick={() => {
+              if (user?.profile) {
+                setFormData({
+                  name: user.profile.full_name || '',
+                  branch: user.profile.branch || '',
+                  section: user.profile.section || '',
+                  phone_number: user.profile.phone_number || '',
+                  academic_year: user.profile.academic_year || '',
+                  cgpa: user.profile.cgpa?.toString() || '',
+                  linkedin_url: user.profile.linkedin_url || '',
+                  github_url: user.profile.github_url || '',
+                  instagram_url: user.profile.instagram_url || '',
+                });
+              }
+              setIsEditing(true);
+            }}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold text-sm transition-colors"
           >
             <Settings className="w-4 h-4" />
@@ -107,7 +175,7 @@ export const ProfilePage: React.FC = () => {
         <div className="px-8 pb-8">
           <div className="relative -mt-16 mb-6 flex justify-between items-end">
             <div className="w-32 h-32 rounded-2xl bg-slate-800 border-4 border-slate-900 shadow-2xl flex items-center justify-center text-4xl font-bold text-sky-400 uppercase">
-              {formData.name.charAt(0)}
+              {user?.profile?.full_name?.charAt(0) || ''}
             </div>
             {isEditing && (
               <div className="flex gap-3">
@@ -132,7 +200,7 @@ export const ProfilePage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-white">{formData.name}</h2>
+                  <h2 className="text-2xl font-bold text-white">{user?.profile?.full_name}</h2>
                   <p className="text-sky-400 flex items-center gap-2 mt-1">
                     <Mail className="w-4 h-4" /> {user?.email}
                   </p>
@@ -142,26 +210,26 @@ export const ProfilePage: React.FC = () => {
                   <div className="p-4 rounded-2xl bg-slate-800/50 border border-slate-700/50">
                     <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">Branch</p>
                     <p className="text-white font-semibold flex items-center gap-2">
-                      <BookOpen className="w-4 h-4 text-sky-500" /> {formData.branch} - {formData.section}
+                      <BookOpen className="w-4 h-4 text-sky-500" /> {user?.profile?.branch} - {user?.profile?.section}
                     </p>
                   </div>
                   <div className="p-4 rounded-2xl bg-slate-800/50 border border-slate-700/50">
                     <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">Year</p>
                     <p className="text-white font-semibold flex items-center gap-2">
-                      <GraduationCap className="w-4 h-4 text-indigo-500" /> {formData.academic_year}
+                      <GraduationCap className="w-4 h-4 text-indigo-500" /> {user?.profile?.academic_year}
                     </p>
                   </div>
                   <div className="p-4 rounded-2xl bg-slate-800/50 border border-slate-700/50">
                     <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">Phone</p>
                     <p className="text-white font-semibold flex items-center gap-2">
-                      <Phone className="w-4 h-4 text-emerald-500" /> {formData.phone_number || 'N/A'}
+                      <Phone className="w-4 h-4 text-emerald-500" /> {user?.profile?.phone_number || 'N/A'}
                     </p>
                   </div>
                   <div className="p-4 rounded-2xl bg-slate-800/50 border border-slate-700/50">
                     <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">CGPA</p>
                     <p className="text-white font-semibold flex items-center gap-2">
                       <span className="w-4 h-4 flex items-center justify-center text-rose-500 font-bold">#</span> 
-                      {formData.cgpa || 'N/A'}
+                      {user?.profile?.cgpa || 'N/A'}
                     </p>
                   </div>
                 </div>
@@ -170,19 +238,34 @@ export const ProfilePage: React.FC = () => {
               <div className="space-y-4">
                 <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider">Social Links</h3>
                 <div className="flex flex-col gap-3">
-                  {formData.github_url && (
-                    <a href={formData.github_url} target="_blank" rel="noreferrer" className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700 hover:border-slate-600 transition-colors text-slate-300 hover:text-white">
-                      <Github className="w-5 h-5" /> {formData.github_url}
+                  {user?.profile?.github_url && (
+                    <a 
+                      href={formatExternalUrl(user.profile.github_url, 'github.com')} 
+                      target="_blank" 
+                      rel="noreferrer" 
+                      className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700 hover:border-slate-600 transition-colors text-slate-300 hover:text-white"
+                    >
+                      <Github className="w-5 h-5" /> {getUrlDisplayText(user.profile.github_url, 'github.com')}
                     </a>
                   )}
-                  {formData.linkedin_url && (
-                    <a href={formData.linkedin_url} target="_blank" rel="noreferrer" className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700 hover:border-sky-600 transition-colors text-slate-300 hover:text-sky-400">
-                      <Linkedin className="w-5 h-5" /> {formData.linkedin_url}
+                  {user?.profile?.linkedin_url && (
+                    <a 
+                      href={formatExternalUrl(user.profile.linkedin_url, 'linkedin.com')} 
+                      target="_blank" 
+                      rel="noreferrer" 
+                      className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700 hover:border-sky-600 transition-colors text-slate-300 hover:text-sky-400"
+                    >
+                      <Linkedin className="w-5 h-5" /> {getUrlDisplayText(user.profile.linkedin_url, 'linkedin.com')}
                     </a>
                   )}
-                  {formData.instagram_url && (
-                    <a href={formData.instagram_url} target="_blank" rel="noreferrer" className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700 hover:border-rose-600 transition-colors text-slate-300 hover:text-rose-400">
-                      <Instagram className="w-5 h-5" /> {formData.instagram_url}
+                  {user?.profile?.instagram_url && (
+                    <a 
+                      href={formatExternalUrl(user.profile.instagram_url, 'instagram.com')} 
+                      target="_blank" 
+                      rel="noreferrer" 
+                      className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700 hover:border-rose-600 transition-colors text-slate-300 hover:text-rose-400"
+                    >
+                      <Instagram className="w-5 h-5" /> {getUrlDisplayText(user.profile.instagram_url, 'instagram.com')}
                     </a>
                   )}
                 </div>
