@@ -16,11 +16,10 @@ import {
   ManageEventsPage,
   ManageCertificatesPage,
   ManageCommitteesPage,
-  ManageAlumniPage,
   ManageGrievancesPage,
   ManageMediaPage,
-  ManageAchievementsPage,
-  AdminSettingsPage
+  AdminSettingsPage,
+  ManageAlumniAchievementsPage
 } from './pages/admin';
 import { 
   ProfilePage, 
@@ -269,8 +268,24 @@ export const App: React.FC = () => {
               <Route
                 path="/admin/alumni"
                 element={
-                  <ProtectedRoute allowedRoles={['admin']}>
-                    <ManageAlumniPage />
+                  <ProtectedRoute allowedRoles={['admin', 'committee']}>
+                    <ManageAlumniAchievementsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/achievements"
+                element={
+                  <ProtectedRoute allowedRoles={['admin', 'committee']}>
+                    <ManageAlumniAchievementsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/alumni-achievements"
+                element={
+                  <ProtectedRoute allowedRoles={['admin', 'committee']}>
+                    <ManageAlumniAchievementsPage />
                   </ProtectedRoute>
                 }
               />
@@ -287,14 +302,6 @@ export const App: React.FC = () => {
                 element={
                   <ProtectedRoute allowedRoles={['admin', 'committee']}>
                     <ManageMediaPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/achievements"
-                element={
-                  <ProtectedRoute allowedRoles={['admin', 'committee']}>
-                    <ManageAchievementsPage />
                   </ProtectedRoute>
                 }
               />

@@ -9,3 +9,4 @@ export * from './ManageGrievancesPage';
 export * from './ManageMediaPage';
 export * from './ManageAchievementsPage';
 export * from './AdminSettingsPage';
+export * from './ManageAlumniAchievementsPage';
