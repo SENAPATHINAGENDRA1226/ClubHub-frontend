@@ -131,8 +131,8 @@ export const AppLayout: React.FC = () => {
               <img src="/logo.png" alt="DLIDES Student Club Logo" className="w-full h-full object-cover" />
             </div>
             <div>
-              <h1 className="text-xl font-black text-white leading-tight">CSMD DLIDES CLUB</h1>
-              <p className="text-[10px] text-sky-400 font-bold tracking-widest uppercase">Campus</p>
+              <h1 className="text-xl font-black text-white leading-tight">DLIDES CLUB</h1>
+              <p className="text-[10px] text-sky-400 font-bold tracking-widest uppercase">CSMD</p>
             </div>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-slate-400 hover:text-white">

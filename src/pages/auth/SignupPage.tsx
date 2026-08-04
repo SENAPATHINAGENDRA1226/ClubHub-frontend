@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import api, { getErrorMessage } from '../../services/api';
 import { Lock, Mail, Sparkles, User, UserCheck, Compass, Code } from 'lucide-react';
@@ -92,7 +93,11 @@ export const SignupPage: React.FC = () => {
           </p>
 
           <div className="space-y-4">
-            <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/60 backdrop-blur-md">
+            <motion.div
+              whileHover={{ x: 8, scale: 1.01 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/60 backdrop-blur-md hover:border-sky-500 hover:ring-2 hover:ring-sky-500/20 hover:shadow-lg hover:shadow-sky-500/10 cursor-pointer transition-all duration-300"
+            >
               <div className="p-2 rounded-xl bg-sky-950 border border-sky-800/50 text-sky-400 shrink-0">
                 <UserCheck className="w-5 h-5" />
               </div>
@@ -100,9 +105,13 @@ export const SignupPage: React.FC = () => {
                 <h4 className="text-sm font-semibold text-white">Login to Portal</h4>
                 <p className="text-xs text-slate-400">Access student and admin features, events, and registrations.</p>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/60 backdrop-blur-md">
+            <motion.div
+              whileHover={{ x: 8, scale: 1.01 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/60 backdrop-blur-md hover:border-sky-500 hover:ring-2 hover:ring-sky-500/20 hover:shadow-lg hover:shadow-sky-500/10 cursor-pointer transition-all duration-300"
+            >
               <div className="p-2 rounded-xl bg-indigo-950 border border-indigo-800/50 text-indigo-400 shrink-0">
                 <Compass className="w-5 h-5" />
               </div>
@@ -110,9 +119,13 @@ export const SignupPage: React.FC = () => {
                 <h4 className="text-sm font-semibold text-white">Explore the Club</h4>
                 <p className="text-xs text-slate-400">Join hackathons, workshops, coding contests, and projects.</p>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/60 backdrop-blur-md">
+            <motion.div
+              whileHover={{ x: 8, scale: 1.01 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/60 backdrop-blur-md hover:border-sky-500 hover:ring-2 hover:ring-sky-500/20 hover:shadow-lg hover:shadow-sky-500/10 cursor-pointer transition-all duration-300"
+            >
               <div className="p-2 rounded-xl bg-purple-950 border border-purple-800/50 text-purple-400 shrink-0">
                 <Code className="w-5 h-5" />
               </div>
@@ -122,7 +135,7 @@ export const SignupPage: React.FC = () => {
                   The Coding Club empowers students through hands-on workshops, competitive programming, hackathons, and real-world projects. Whether you are beginning your journey or refining your expertise, this is the space to grow, collaborate, and stand out.
                 </p>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
 

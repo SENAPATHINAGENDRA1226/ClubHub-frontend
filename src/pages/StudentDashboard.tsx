@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useRealtime } from '../context/RealtimeContext';
 import api from '../services/api';
@@ -18,6 +19,8 @@ interface DashboardData {
   my_registrations_count: number;
   quick_links: QuickLink[];
 }
+
+const MotionLink = motion(Link);
 
 export const StudentDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -124,10 +127,12 @@ export const StudentDashboard: React.FC = () => {
         <h3 className="text-xl font-bold text-white">Quick Links</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {data?.quick_links.map((link, idx) => (
-            <Link
+            <MotionLink
               key={idx}
               to={link.url}
-              className="group p-5 rounded-2xl bg-slate-900 border border-slate-800 hover:bg-slate-800 hover:border-sky-500/50 transition-all flex flex-col gap-3"
+              whileHover={{ y: -4, scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              className="group p-5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-sky-500 hover:ring-2 hover:ring-sky-500/20 hover:shadow-lg hover:shadow-sky-500/10 flex flex-col gap-3 cursor-pointer transition-all duration-300"
             >
               <div className="p-2.5 rounded-xl bg-slate-800 group-hover:bg-sky-500/20 group-hover:text-sky-400 text-slate-400 w-fit transition-colors">
                 {renderIcon(link.icon)}
@@ -135,7 +140,7 @@ export const StudentDashboard: React.FC = () => {
               <span className="font-semibold text-slate-200 group-hover:text-white">
                 {link.title}
               </span>
-            </Link>
+            </MotionLink>
           ))}
         </div>
       </div>
