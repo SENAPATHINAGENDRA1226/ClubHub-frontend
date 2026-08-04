@@ -88,10 +88,17 @@ export const OnboardingPage: React.FC = () => {
       }
       val = integerPart + '.' + decimalPart;
     } else {
-      // If no dot, limit to 2 digits.
-      // If the user types a 3rd digit, automatically insert dot
-      if (val.length > 2) {
-        val = val.slice(0, 2) + '.' + val.slice(2, 3);
+      // If no dot:
+      // If it starts with "10", let it be "10" without dot immediately.
+      // If it starts with any other digit, once length > 1, auto-insert the dot.
+      if (val.length > 1) {
+        if (val.startsWith('10')) {
+          if (val.length > 2) {
+            val = '10.' + val.slice(2, 3);
+          }
+        } else {
+          val = val.slice(0, 1) + '.' + val.slice(1, 2);
+        }
       }
     }
 
@@ -115,14 +122,14 @@ export const OnboardingPage: React.FC = () => {
     }
     if (step === 2) {
       if (cgpa) {
-        const cgpaRegex = /^\d{2}\.\d{2}$/;
+        const cgpaRegex = /^(?:10\.00|\d\.\d{2})$/;
         if (!cgpaRegex.test(cgpa)) {
-          setErrorMsg('CGPA must be in xx.xx format (e.g. 08.75 or 10.00).');
+          setErrorMsg('CGPA must be in x.xx format (e.g. 8.75 or 10.00).');
           return;
         }
         const parsed = parseFloat(cgpa);
         if (isNaN(parsed) || parsed < 0 || parsed > 10) {
-          setErrorMsg('CGPA must be between 00.00 and 10.00.');
+          setErrorMsg('CGPA must be between 0.00 and 10.00.');
           return;
         }
       }
@@ -150,16 +157,16 @@ export const OnboardingPage: React.FC = () => {
     }
 
     if (cgpa) {
-      const cgpaRegex = /^\d{2}\.\d{2}$/;
+      const cgpaRegex = /^(?:10\.00|\d\.\d{2})$/;
       if (!cgpaRegex.test(cgpa)) {
-        setErrorMsg('CGPA must be in xx.xx format (e.g. 08.75 or 10.00).');
+        setErrorMsg('CGPA must be in x.xx format (e.g. 8.75 or 10.00).');
         setLoading(false);
         setStep(2);
         return;
       }
       const parsed = parseFloat(cgpa);
       if (isNaN(parsed) || parsed < 0 || parsed > 10) {
-        setErrorMsg('CGPA must be between 00.00 and 10.00.');
+        setErrorMsg('CGPA must be between 0.00 and 10.00.');
         setLoading(false);
         setStep(2);
         return;
@@ -371,12 +378,12 @@ export const OnboardingPage: React.FC = () => {
                     type="text"
                     value={cgpa}
                     onChange={handleCgpaChange}
-                    placeholder="e.g. 08.75 or 10.00"
+                    placeholder="e.g. 8.75 or 10.00"
                     className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all"
                   />
                 </div>
                 <p className="text-[11px] text-slate-500 mt-1">
-                  Must be in xx.xx format (e.g. 08.75 or 10.00) between 00.00 and 10.00.
+                  Must be in x.xx format (e.g. 8.75 or 10.00) between 0.00 and 10.00.
                 </p>
               </div>
             </div>

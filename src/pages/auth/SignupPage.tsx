@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import api, { getErrorMessage } from '../../services/api';
-import { Lock, Mail, Sparkles, User, UserCheck } from 'lucide-react';
+import { Lock, Mail, Sparkles, User, UserCheck, Compass, Code } from 'lucide-react';
 
 export const SignupPage: React.FC = () => {
   const navigate = useNavigate();
@@ -69,27 +69,61 @@ export const SignupPage: React.FC = () => {
         <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
         <div className="relative z-10 flex items-center gap-3">
-          <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-gradient-to-tr from-sky-600 to-sky-400 text-white shadow-lg shadow-sky-500/20">
-            <Sparkles className="w-6 h-6" />
+          <div className="flex items-center justify-center w-11 h-11 rounded-2xl overflow-hidden bg-slate-900/40 border border-slate-800 shadow-lg shrink-0">
+            <img src="/logo.png" alt="DLIDES Student Club Logo" className="w-full h-full object-cover" />
           </div>
           <div>
-            <span className="text-2xl font-black tracking-tight text-white">CSMD DLIDES CLUB</span>
-            <span className="block text-xs font-semibold text-sky-400 uppercase tracking-widest">Campus Community</span>
+            <span className="text-2xl font-black tracking-tight text-white">DLIDES CLUB</span>
+            <span className="block text-xs font-semibold text-sky-400 uppercase tracking-widest">Department Of CSMD</span>
           </div>
         </div>
 
         <div className="relative z-10 my-auto py-12 max-w-lg">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-sky-950/80 border border-sky-800/50 text-sky-300 text-xs font-medium mb-6 backdrop-blur-md">
-            <UserCheck className="w-3.5 h-3.5 text-sky-400" />
-            Join Campus Community
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-sky-950/80 border border-sky-800/50 text-sky-300 text-xs font-semibold mb-6 backdrop-blur-md">
+            <Sparkles className="w-3.5 h-3.5 text-sky-400" />
+            Learn. Build. Lead.
           </div>
 
           <h1 className="text-5xl font-black text-white leading-tight tracking-tight mb-4">
-            Start your <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-indigo-300 to-sky-200">journey</span> today.
+            Learn. Build. <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-indigo-300 to-sky-200">Lead.</span>
           </h1>
-          <p className="text-slate-400 text-base leading-relaxed mb-6">
-            Create your student account to register for events, claim verified digital certificates, and connect with technical & non-technical campus committees.
+          <p className="text-slate-400 text-base leading-relaxed mb-8">
+            A student-driven community for coding, innovation, and growth. Explore events, track your progress, earn certificates, and unlock opportunities — all in one place.
           </p>
+
+          <div className="space-y-4">
+            <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/60 backdrop-blur-md">
+              <div className="p-2 rounded-xl bg-sky-950 border border-sky-800/50 text-sky-400 shrink-0">
+                <UserCheck className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="text-sm font-semibold text-white">Login to Portal</h4>
+                <p className="text-xs text-slate-400">Access student and admin features, events, and registrations.</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/60 backdrop-blur-md">
+              <div className="p-2 rounded-xl bg-indigo-950 border border-indigo-800/50 text-indigo-400 shrink-0">
+                <Compass className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="text-sm font-semibold text-white">Explore the Club</h4>
+                <p className="text-xs text-slate-400">Join hackathons, workshops, coding contests, and projects.</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/60 backdrop-blur-md">
+              <div className="p-2 rounded-xl bg-purple-950 border border-purple-800/50 text-purple-400 shrink-0">
+                <Code className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="text-sm font-semibold text-white">About the Club</h4>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  The Coding Club empowers students through hands-on workshops, competitive programming, hackathons, and real-world projects. Whether you are beginning your journey or refining your expertise, this is the space to grow, collaborate, and stand out.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="relative z-10 flex items-center justify-between text-xs text-slate-500 border-t border-slate-800/60 pt-6">

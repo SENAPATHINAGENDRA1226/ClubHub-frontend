@@ -15,7 +15,6 @@ import {
   Trophy,
   GraduationCap,
   Mail,
-  Sparkles,
   LogOut,
   Menu,
   X,
@@ -128,8 +127,8 @@ export const AppLayout: React.FC = () => {
       >
         <div className="flex items-center justify-between p-6 h-20 border-b border-slate-800/50">
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 text-white shadow-lg shadow-sky-500/20">
-              <Sparkles className="w-5 h-5" />
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl overflow-hidden bg-slate-900/40 border border-slate-800 shadow-lg shrink-0">
+              <img src="/logo.png" alt="DLIDES Student Club Logo" className="w-full h-full object-cover" />
             </div>
             <div>
               <h1 className="text-xl font-black text-white leading-tight">CSMD DLIDES CLUB</h1>

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import { UserRole } from '../../types/auth';
-import { Award, Lock, Mail, QrCode, Shield, Sparkles, UserCheck, Users, AlertTriangle, UserX, ArrowRight } from 'lucide-react';
+import { Lock, Mail, Shield, Sparkles, UserCheck, Users, AlertTriangle, UserX, ArrowRight, Compass, Code } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -143,57 +143,59 @@ export const LoginPage: React.FC = () => {
 
         {/* Top Header */}
         <div className="relative z-10 flex items-center gap-3">
-          <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-gradient-to-tr from-sky-600 to-sky-400 text-white shadow-lg shadow-sky-500/20">
-            <Sparkles className="w-6 h-6" />
+          <div className="flex items-center justify-center w-11 h-11 rounded-2xl overflow-hidden bg-slate-900/40 border border-slate-800 shadow-lg shrink-0">
+            <img src="/logo.png" alt="DLIDES Student Club Logo" className="w-full h-full object-cover" />
           </div>
           <div>
-            <span className="text-2xl font-black tracking-tight text-white">CSMD DLIDES CLUB</span>
-            <span className="block text-xs font-semibold text-sky-400 uppercase tracking-widest">Campus Community</span>
+            <span className="text-2xl font-black tracking-tight text-white">DLIDES CLUB</span>
+            <span className="block text-xs font-semibold text-sky-400 uppercase tracking-widest">Department Of CSMD</span>
           </div>
         </div>
 
         {/* Middle Tagline & Features */}
         <div className="relative z-10 my-auto py-12 max-w-lg">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-sky-950/80 border border-sky-800/50 text-sky-300 text-xs font-medium mb-6 backdrop-blur-md">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-sky-950/80 border border-sky-800/50 text-sky-300 text-xs font-semibold mb-6 backdrop-blur-md">
             <Sparkles className="w-3.5 h-3.5 text-sky-400" />
-            Empowering Student Builders
+            Learn. Build. Lead.
           </div>
 
           <h1 className="text-5xl font-black text-white leading-tight tracking-tight mb-4">
-            Where <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-indigo-300 to-sky-200">builders</span> meet.
+            Learn. Build. <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-indigo-300 to-sky-200">Lead.</span>
           </h1>
           <p className="text-slate-400 text-base leading-relaxed mb-8">
-            An all-in-one campus ecosystem for hackathons, event check-ins, HMAC digital certificates, and committee collaboration.
+            A student-driven community for coding, innovation, and growth. Explore events, track your progress, earn certificates, and unlock opportunities — all in one place.
           </p>
 
           <div className="space-y-4">
-            <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/60 backdrop-blur-md">
-              <div className="p-2 rounded-xl bg-sky-950 border border-sky-800/50 text-sky-400">
-                <QrCode className="w-5 h-5" />
+            <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/60 backdrop-blur-md">
+              <div className="p-2 rounded-xl bg-sky-950 border border-sky-800/50 text-sky-400 shrink-0">
+                <UserCheck className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="text-sm font-semibold text-white">Instant QR Code Check-ins</h4>
-                <p className="text-xs text-slate-400">Tamper-proof HMAC digital event verification</p>
+                <h4 className="text-sm font-semibold text-white">Login to Portal</h4>
+                <p className="text-xs text-slate-400">Access student and admin features, events, and registrations.</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/60 backdrop-blur-md">
-              <div className="p-2 rounded-xl bg-indigo-950 border border-indigo-800/50 text-indigo-400">
-                <Award className="w-5 h-5" />
+            <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/60 backdrop-blur-md">
+              <div className="p-2 rounded-xl bg-indigo-950 border border-indigo-800/50 text-indigo-400 shrink-0">
+                <Compass className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="text-sm font-semibold text-white">Verifiable Certificates</h4>
-                <p className="text-xs text-slate-400">PDF streaming & bulk ZIP certificate generation</p>
+                <h4 className="text-sm font-semibold text-white">Explore the Club</h4>
+                <p className="text-xs text-slate-400">Join hackathons, workshops, coding contests, and projects.</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/60 backdrop-blur-md">
-              <div className="p-2 rounded-xl bg-purple-950 border border-purple-800/50 text-purple-400">
-                <Users className="w-5 h-5" />
+            <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/60 backdrop-blur-md">
+              <div className="p-2 rounded-xl bg-purple-950 border border-purple-800/50 text-purple-400 shrink-0">
+                <Code className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="text-sm font-semibold text-white">Realtime Committee Workspaces</h4>
-                <p className="text-xs text-slate-400">Live WebSockets event synchronization</p>
+                <h4 className="text-sm font-semibold text-white">About the Club</h4>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  The Coding Club empowers students through hands-on workshops, competitive programming, hackathons, and real-world projects. Whether you are beginning your journey or refining your expertise, this is the space to grow, collaborate, and stand out.
+                </p>
               </div>
             </div>
           </div>
@@ -226,11 +228,10 @@ export const LoginPage: React.FC = () => {
             <button
               type="button"
               onClick={() => handleTabChange('student')}
-              className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold tracking-wide transition-all duration-200 flex items-center justify-center gap-2 ${
-                activeTab === 'student'
+              className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold tracking-wide transition-all duration-200 flex items-center justify-center gap-2 ${activeTab === 'student'
                   ? 'bg-sky-600 text-white shadow-lg shadow-sky-600/30'
                   : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
-              }`}
+                }`}
             >
               <UserCheck className="w-4 h-4" />
               Student
@@ -239,11 +240,10 @@ export const LoginPage: React.FC = () => {
             <button
               type="button"
               onClick={() => handleTabChange('admin')}
-              className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold tracking-wide transition-all duration-200 flex items-center justify-center gap-2 ${
-                activeTab === 'admin'
+              className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold tracking-wide transition-all duration-200 flex items-center justify-center gap-2 ${activeTab === 'admin'
                   ? 'bg-sky-600 text-white shadow-lg shadow-sky-600/30'
                   : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
-              }`}
+                }`}
             >
               <Shield className="w-4 h-4" />
               Admin
@@ -252,11 +252,10 @@ export const LoginPage: React.FC = () => {
             <button
               type="button"
               onClick={() => handleTabChange('committee')}
-              className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold tracking-wide transition-all duration-200 flex items-center justify-center gap-2 ${
-                activeTab === 'committee'
+              className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold tracking-wide transition-all duration-200 flex items-center justify-center gap-2 ${activeTab === 'committee'
                   ? 'bg-sky-600 text-white shadow-lg shadow-sky-600/30'
                   : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
-              }`}
+                }`}
             >
               <Users className="w-4 h-4" />
               Committee
@@ -281,13 +280,7 @@ export const LoginPage: React.FC = () => {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder={
-                      activeTab === 'admin'
-                        ? 'admin@csmd-dlides-club.com'
-                        : activeTab === 'committee'
-                        ? 'committee@csmd-dlides-club.com'
-                        : 'student@example.com'
-                    }
+                    placeholder="Enter email"
                     className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all"
                   />
                 </div>
