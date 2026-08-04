@@ -151,10 +151,11 @@ export const AppLayout: React.FC = () => {
                 <NavLink
                   key={item.path}
                   to={item.path}
+                  end
                   className={({ isActive }) =>
                     `flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-sm font-semibold ${
                       isActive
-                        ? 'bg-sky-500/10 text-sky-400'
+                        ? 'bg-sky-600 text-white shadow-lg shadow-sky-600/25'
                         : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'
                     }`
                   }
@@ -174,10 +175,11 @@ export const AppLayout: React.FC = () => {
                 <NavLink
                   key={item.path}
                   to={item.path}
+                  end
                   className={({ isActive }) =>
                     `flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-sm font-semibold ${
                       isActive
-                        ? 'bg-sky-500/10 text-sky-400'
+                        ? 'bg-sky-600 text-white shadow-lg shadow-sky-600/25'
                         : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'
                     }`
                   }

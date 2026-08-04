@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useRealtime } from '../../context/RealtimeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
-import { Users, Mail, X, Plus } from 'lucide-react';
+import { Users, Mail, X, Plus, Phone } from 'lucide-react';
 import { ManageableCardOverlay, DeleteConfirmModal } from '../../components/ManageableGrid';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/EmptyState';
@@ -14,6 +14,8 @@ interface CommitteeMember {
   full_name: string;
   role_title: string;
   email: string;
+  faculty_id?: string | null;
+  phone_number?: string | null;
   photo_url: string | null;
   bio: string | null;
 }
@@ -63,8 +65,10 @@ export const CommitteesPage: React.FC = () => {
     name: '', description: '', category: 'faculty', sub_category: 'CSM'
   });
   const [memberForm, setMemberForm] = useState({
-    full_name: '', email: '', role_title: '', bio: '', photo_url: ''
+    full_name: '', email: '', role_title: '', faculty_id: '', phone_number: '', bio: '', photo_url: ''
   });
+  const [isEditingMember, setIsEditingMember] = useState(false);
+  const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
 
   const fetchCommittees = async () => {
     try {
@@ -121,8 +125,19 @@ export const CommitteesPage: React.FC = () => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await api.post('/committees', committeeForm);
+      const res = await api.post('/committees', committeeForm);
       setIsCommitteeModalOpen(false);
+      
+      const createdComm = res.data;
+      if (createdComm && createdComm.category) {
+        setMasterCategory(createdComm.category);
+        if (createdComm.category === 'faculty') {
+          setFacultySubCategory(createdComm.sub_category);
+        } else if (createdComm.category === 'student') {
+          setStudentSubCategory(createdComm.sub_category);
+        }
+      }
+      
       fetchCommittees();
     } catch (err) {
       console.error(err);
@@ -133,11 +148,17 @@ export const CommitteesPage: React.FC = () => {
 
   const handleMemberSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedCommitteeId) return;
     setIsSubmitting(true);
     try {
-      await api.post(`/committees/${selectedCommitteeId}/members`, memberForm);
+      if (isEditingMember && editingMemberId) {
+        await api.put(`/committee-members/${editingMemberId}`, memberForm);
+      } else {
+        if (!selectedCommitteeId) return;
+        await api.post(`/committees/${selectedCommitteeId}/members`, memberForm);
+      }
       setIsMemberModalOpen(false);
+      setIsEditingMember(false);
+      setEditingMemberId(null);
       fetchCommittees();
     } catch (err) {
       console.error(err);
@@ -305,7 +326,9 @@ export const CommitteesPage: React.FC = () => {
                     <button
                       onClick={() => {
                         setSelectedCommitteeId(committee.id);
-                        setMemberForm({ full_name: '', email: '', role_title: '', bio: '', photo_url: '' });
+                        setMemberForm({ full_name: '', email: '', role_title: '', faculty_id: '', phone_number: '', bio: '', photo_url: '' });
+                        setIsEditingMember(false);
+                        setEditingMemberId(null);
                         setIsMemberModalOpen(true);
                       }}
                       className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-400 text-sm font-bold transition-colors border border-slate-700"
@@ -339,7 +362,21 @@ export const CommitteesPage: React.FC = () => {
                         
                         <ManageableCardOverlay
                           canManage={canManage}
-                          onEdit={() => {}}
+                          onEdit={() => {
+                            setMemberForm({
+                              full_name: member.full_name,
+                              email: member.email,
+                              role_title: member.role_title,
+                              faculty_id: member.faculty_id || '',
+                              phone_number: member.phone_number || '',
+                              bio: member.bio || '',
+                              photo_url: member.photo_url || ''
+                            });
+                            setIsEditingMember(true);
+                            setEditingMemberId(member.id);
+                            setSelectedCommitteeId(committee.id);
+                            setIsMemberModalOpen(true);
+                          }}
                           onDelete={() => {
                             setDeletingType('member');
                             setDeletingItem(member);
@@ -397,9 +434,23 @@ export const CommitteesPage: React.FC = () => {
                     <p className="text-sky-400 font-bold mt-1">{selectedMember.role_title}</p>
                   </div>
 
-                  <a href={`mailto:${selectedMember.email}`} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors text-sm font-semibold">
-                    <Mail className="w-4 h-4" /> {selectedMember.email}
-                  </a>
+                  <div className="flex flex-col gap-2 mt-4 text-sm w-full">
+                    <a href={`mailto:${selectedMember.email}`} className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors font-semibold">
+                      <Mail className="w-4 h-4 text-sky-400" /> {selectedMember.email}
+                    </a>
+                    
+                    {selectedMember.phone_number && (
+                      <div className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-semibold">
+                        <Phone className="w-4 h-4 text-emerald-400" /> {selectedMember.phone_number}
+                      </div>
+                    )}
+                    
+                    {selectedMember.faculty_id && (
+                      <div className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-semibold">
+                        <span className="text-xs font-bold text-indigo-400">ID:</span> {selectedMember.faculty_id}
+                      </div>
+                    )}
+                  </div>
 
                   {selectedMember.bio && (
                     <div className="pt-6 mt-6 border-t border-slate-800/80">
@@ -442,6 +493,46 @@ export const CommitteesPage: React.FC = () => {
                 />
               </div>
 
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Category</label>
+                  <select
+                    value={committeeForm.category}
+                    onChange={e => {
+                      const newCat = e.target.value as 'faculty' | 'student';
+                      const defaultSub = newCat === 'faculty' ? 'CSM' : 'coding';
+                      setCommitteeForm({ ...committeeForm, category: newCat, sub_category: defaultSub });
+                    }}
+                    className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-sky-500 transition-colors"
+                  >
+                    <option value="faculty">Faculty</option>
+                    <option value="student">Student</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Sub Category</label>
+                  <select
+                    value={committeeForm.sub_category}
+                    onChange={e => setCommitteeForm({ ...committeeForm, sub_category: e.target.value as any })}
+                    className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-sky-500 transition-colors"
+                  >
+                    {committeeForm.category === 'faculty' ? (
+                      <>
+                        <option value="CSM">CSM</option>
+                        <option value="CSD">CSD</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="coding">Coding</option>
+                        <option value="sports">Sports</option>
+                        <option value="non_technical">Non-Technical</option>
+                      </>
+                    )}
+                  </select>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Description</label>
                 <textarea
@@ -472,7 +563,7 @@ export const CommitteesPage: React.FC = () => {
             className="bg-slate-900 border border-slate-800 p-6 rounded-3xl max-w-lg w-full shadow-2xl overflow-y-auto max-h-[90vh]"
           >
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-white">Add Member</h2>
+              <h2 className="text-xl font-bold text-white">{isEditingMember ? 'Edit Member' : 'Add Member'}</h2>
               <button onClick={() => setIsMemberModalOpen(false)} className="text-slate-400 hover:text-white">
                 <X className="w-6 h-6" />
               </button>
@@ -499,6 +590,27 @@ export const CommitteesPage: React.FC = () => {
                   onChange={e => setMemberForm({ ...memberForm, email: e.target.value })}
                   className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-sky-500 transition-colors"
                 />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Faculty ID (Optional)</label>
+                  <input
+                    type="text"
+                    value={memberForm.faculty_id}
+                    onChange={e => setMemberForm({ ...memberForm, faculty_id: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-sky-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Phone Number (Optional)</label>
+                  <input
+                    type="tel"
+                    value={memberForm.phone_number}
+                    onChange={e => setMemberForm({ ...memberForm, phone_number: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-sky-500 transition-colors"
+                  />
+                </div>
               </div>
 
               <div>
@@ -534,7 +646,7 @@ export const CommitteesPage: React.FC = () => {
               <div className="pt-4 flex gap-3">
                 <button type="button" onClick={() => setIsMemberModalOpen(false)} className="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm">Cancel</button>
                 <button type="submit" disabled={isSubmitting} className="flex-1 py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-sm">
-                  {isSubmitting ? 'Saving...' : 'Add'}
+                  {isSubmitting ? 'Saving...' : (isEditingMember ? 'Save Changes' : 'Add')}
                 </button>
               </div>
             </form>

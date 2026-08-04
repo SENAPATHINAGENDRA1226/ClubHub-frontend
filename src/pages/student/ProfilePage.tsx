@@ -107,7 +107,17 @@ export const ProfilePage: React.FC = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await api.post('/onboarding/student?force=true', formData);
+      const payload = {
+        branch: formData.branch,
+        section: formData.section,
+        academic_year: formData.academic_year,
+        phone_number: formData.phone_number,
+        cgpa: formData.cgpa ? parseFloat(formData.cgpa) : null,
+        linkedin_url: formData.linkedin_url.trim() || null,
+        github_url: formData.github_url.trim() || null,
+        instagram_url: formData.instagram_url.trim() || null,
+      };
+      await api.post('/onboarding/student?force=true', payload);
       // Re-fetch user data to update auth context
       const meRes = await api.get('/auth/me');
       const token = localStorage.getItem('access_token') || '';
