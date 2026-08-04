@@ -64,7 +64,7 @@ export const AppLayout: React.FC = () => {
   const { user, logout, role } = useAuth();
   const { subscribe } = useRealtime();
   const { theme, toggleTheme } = useTheme();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 1024);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
@@ -121,8 +121,10 @@ export const AppLayout: React.FC = () => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-72 bg-slate-900 border-r border-slate-800 transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed inset-y-0 left-0 z-50 w-72 bg-slate-900 border-r border-slate-800 transform transition-all duration-300 ease-in-out lg:relative ${
+          sidebarOpen 
+            ? 'translate-x-0 opacity-100' 
+            : '-translate-x-full lg:-ml-72 opacity-0 pointer-events-none'
         } flex flex-col`}
       >
         <div className="flex items-center justify-between p-6 h-20 border-b border-slate-800/50">
@@ -196,7 +198,8 @@ export const AppLayout: React.FC = () => {
           <div className="flex items-center gap-4">
             <button
               onClick={toggleSidebar}
-              className="p-2 -ml-2 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-colors lg:hidden"
+              className="p-2 -ml-2 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-colors flex items-center justify-center shrink-0"
+              title={sidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
             >
               <Menu className="w-6 h-6" />
             </button>
