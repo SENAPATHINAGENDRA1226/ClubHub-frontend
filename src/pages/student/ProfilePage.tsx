@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
-import { Mail, Phone, BookOpen, GraduationCap, Github, Linkedin, Instagram, Settings, Save, X, Ticket, CheckCircle2 } from 'lucide-react';
+import { Mail, Phone, BookOpen, GraduationCap, Github, Linkedin, Instagram, Settings, Save, X, Ticket, CheckCircle2, Camera } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const formatExternalUrl = (url: string, defaultDomain: string) => {
   if (!url) return '';
@@ -44,6 +45,7 @@ export const ProfilePage: React.FC = () => {
   const { user, login } = useAuth(); // Need to call auth /me again to update context or just rely on local state
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   
   const [formData, setFormData] = useState({
     name: user?.profile?.full_name || '',
@@ -59,6 +61,38 @@ export const ProfilePage: React.FC = () => {
 
   const [registrations, setRegistrations] = useState<any[]>([]);
   const [selectedQr, setSelectedQr] = useState<{ url: string; regNum: string } | null>(null);
+
+  const getPhotoUrl = (rawUrl?: string) => {
+    if (!rawUrl) return '';
+    if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://')) return rawUrl;
+    const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+    const serverBase = apiBase.replace(/\/api\/?$/, '');
+    return `${serverBase}${rawUrl.startsWith('/') ? '' : '/'}${rawUrl}`;
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingPhoto(true);
+    const form = new FormData();
+    form.append('file', file);
+
+    try {
+      await api.post('/users/profile-photo', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      toast.success('Profile photo updated successfully!');
+      const meRes = await api.get('/auth/me');
+      const token = localStorage.getItem('access_token') || '';
+      const refresh = localStorage.getItem('refresh_token') || '';
+      login(token, refresh, meRes.data, 'student', true);
+    } catch (err) {
+      toast.error('Failed to upload profile photo');
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
 
   const getQrUrl = (rawUrl?: string) => {
     if (!rawUrl) return '';
@@ -184,8 +218,37 @@ export const ProfilePage: React.FC = () => {
         <div className="h-32 bg-gradient-to-r from-sky-900 to-indigo-900"></div>
         <div className="px-8 pb-8">
           <div className="relative -mt-16 mb-6 flex justify-between items-end">
-            <div className="w-32 h-32 rounded-2xl bg-slate-800 border-4 border-slate-900 shadow-2xl flex items-center justify-center text-4xl font-bold text-sky-400 uppercase">
-              {user?.profile?.full_name?.charAt(0) || ''}
+            <div className="relative group w-32 h-32 rounded-2xl bg-slate-800 border-4 border-slate-900 shadow-2xl overflow-hidden flex items-center justify-center">
+              {user?.profile?.profile_photo_url ? (
+                <img
+                  src={getPhotoUrl(user.profile.profile_photo_url)}
+                  alt={user?.profile?.full_name || 'Profile Photo'}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-4xl font-bold text-sky-400 uppercase">
+                  {user?.profile?.full_name?.charAt(0) || ''}
+                </span>
+              )}
+
+              {/* Upload Photo Overlay */}
+              <label className="absolute inset-0 bg-slate-950/70 opacity-0 group-hover:opacity-100 transition-all duration-200 flex flex-col items-center justify-center cursor-pointer text-white font-semibold text-xs gap-1 backdrop-blur-xs">
+                {uploadingPhoto ? (
+                  <div className="w-6 h-6 border-2 border-sky-400 border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <>
+                    <Camera className="w-6 h-6 text-sky-400" />
+                    <span>Upload Photo</span>
+                  </>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handlePhotoUpload}
+                  disabled={uploadingPhoto}
+                />
+              </label>
             </div>
             {isEditing && (
               <div className="flex gap-3">
