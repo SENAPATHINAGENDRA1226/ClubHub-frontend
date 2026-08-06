@@ -359,9 +359,9 @@ export const ProfilePage: React.FC = () => {
                       href={formatExternalUrl(user.profile.instagram_url, 'instagram.com')} 
                       target="_blank" 
                       rel="noreferrer" 
-                      className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700 hover:border-rose-600 transition-colors text-slate-300 hover:text-rose-400"
+                      className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 hover:bg-pink-500/10 border border-slate-700 hover:border-pink-500 transition-all text-slate-300 hover:text-pink-400"
                     >
-                      <Instagram className="w-5 h-5" /> {getUrlDisplayText(user.profile.instagram_url, 'instagram.com')}
+                      <Instagram className="w-5 h-5 text-pink-400" /> {getUrlDisplayText(user.profile.instagram_url, 'instagram.com')}
                     </a>
                   )}
                 </div>
