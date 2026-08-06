@@ -543,6 +543,7 @@ export const ManageCertificatesPage: React.FC = () => {
                     className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-sky-500"
                   >
                     <option value="">-- Select Student Profile --</option>
+                    <option value="all">🌟 ALL STUDENTS (Issue & Broadcast to Everyone)</option>
                     {students.map((std) => {
                       const val = std.profile?.id || std.id;
                       return (
