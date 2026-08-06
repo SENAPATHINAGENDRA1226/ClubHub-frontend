@@ -39,17 +39,6 @@ interface DashboardData {
   };
 }
 
-const monthlyActivityData = [
-  { month: 'Jan', registrations: 120, certificates: 45, checkins: 180 },
-  { month: 'Feb', registrations: 190, certificates: 80, checkins: 260 },
-  { month: 'Mar', registrations: 240, certificates: 130, checkins: 340 },
-  { month: 'Apr', registrations: 310, certificates: 175, checkins: 420 },
-  { month: 'May', registrations: 280, certificates: 160, checkins: 390 },
-  { month: 'Jun', registrations: 390, certificates: 220, checkins: 510 },
-  { month: 'Jul', registrations: 450, certificates: 285, checkins: 620 },
-  { month: 'Aug', registrations: 520, certificates: 340, checkins: 710 },
-];
-
 const tradeBarColors = [
   '#38bdf8', // sky
   '#818cf8', // indigo
@@ -200,37 +189,37 @@ export const StudentDashboard: React.FC = () => {
   const dynamicTradeMetrics = [
     {
       label: 'Event Registrations',
-      value: data?.live_metrics?.total_registrations ?? 1480,
+      value: data?.live_metrics?.total_registrations ?? 0,
       subText: 'Live DB Records',
-      change: '+28.4%',
-      barWidth: '82%',
+      change: '',
+      barWidth: `${Math.min(100, (data?.live_metrics?.total_registrations ?? 0) * 5)}%`,
       color: 'from-sky-500 to-cyan-400',
       icon: Calendar,
     },
     {
-      label: 'Certificates Claimed',
-      value: data?.live_metrics?.total_certificates ?? 890,
-      subText: 'HMAC Verified',
-      change: '+41.2%',
-      barWidth: '94%',
+      label: 'Certificates Issued',
+      value: data?.live_metrics?.total_certificates ?? 0,
+      subText: 'Database Records',
+      change: '',
+      barWidth: `${Math.min(100, (data?.live_metrics?.total_certificates ?? 0) * 5)}%`,
       color: 'from-emerald-500 to-teal-400',
       icon: ShieldCheck,
     },
     {
       label: 'Active Members',
-      value: data?.live_metrics?.active_members ?? data?.active_members_count ?? 342,
-      subText: 'Verified Profiles',
-      change: '+15.8%',
-      barWidth: '76%',
+      value: data?.live_metrics?.active_members ?? data?.active_members_count ?? 0,
+      subText: 'Registered Profiles',
+      change: '',
+      barWidth: `${Math.min(100, (data?.live_metrics?.active_members ?? data?.active_members_count ?? 0) * 5)}%`,
       color: 'from-purple-500 to-indigo-500',
       icon: Flame,
     },
     {
       label: 'My Registrations',
-      value: data?.live_metrics?.my_registrations ?? data?.my_registrations_count ?? 4,
+      value: data?.live_metrics?.my_registrations ?? data?.my_registrations_count ?? 0,
       subText: 'Enrolled Events',
-      change: '+100%',
-      barWidth: '96%',
+      change: '',
+      barWidth: `${Math.min(100, (data?.live_metrics?.my_registrations ?? data?.my_registrations_count ?? 0) * 10)}%`,
       color: 'from-pink-500 to-rose-500',
       icon: Users,
     },
@@ -238,7 +227,7 @@ export const StudentDashboard: React.FC = () => {
 
   const activeChartData = data?.monthly_activity && data.monthly_activity.length > 0
     ? data.monthly_activity
-    : monthlyActivityData;
+    : [];
 
   const getPhotoUrl = (rawUrl?: string) => {
     if (!rawUrl) return '';
