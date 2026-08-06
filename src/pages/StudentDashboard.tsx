@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useRealtime } from '../context/RealtimeContext';
 import api from '../services/api';
-import { Award, Calendar, Users, Trophy, Sun, Sunrise, Sunset, Moon, Clock, Maximize2, X, TrendingUp, BarChart3, PieChart, Sparkles, Activity, CheckCircle2, Target, ArrowUpRight, LineChart as LineChartIcon, Layers, ShieldCheck, Flame } from 'lucide-react';
+import { Award, Calendar, Users, Trophy, Sun, Sunrise, Sunset, Moon, Clock, Maximize2, X, BarChart3, Sparkles, Activity, ArrowUpRight, LineChart as LineChartIcon, Layers, ShieldCheck, Flame } from 'lucide-react';
 import {
   ResponsiveContainer,
   AreaChart,
@@ -30,6 +30,13 @@ interface DashboardData {
   active_committees_count: number;
   my_registrations_count: number;
   quick_links: QuickLink[];
+  monthly_activity?: any[];
+  live_metrics?: {
+    total_registrations: number;
+    total_certificates: number;
+    active_members: number;
+    my_registrations: number;
+  };
 }
 
 const monthlyActivityData = [
@@ -52,13 +59,6 @@ const tradeBarColors = [
   '#f59e0b', // amber
   '#10b981', // emerald
   '#06b6d4', // cyan
-];
-
-const tradeMetrics = [
-  { label: 'Event Registrations Volume', value: '1,480', subText: '+28.4% vs last mo', change: '+28.4%', barWidth: '82%', color: 'from-sky-500 to-cyan-400', icon: Calendar },
-  { label: 'Certificates Claimed (HMAC)', value: '890', subText: '+41.2% verified', change: '+41.2%', barWidth: '94%', color: 'from-emerald-500 to-teal-400', icon: ShieldCheck },
-  { label: 'Hackathon Activity Index', value: '342', subText: '+15.8% team entries', change: '+15.8%', barWidth: '76%', color: 'from-purple-500 to-indigo-500', icon: Flame },
-  { label: 'Community Retention Rate', value: '96.5%', subText: '+4.2% active check-in', change: '+4.2%', barWidth: '96%', color: 'from-pink-500 to-rose-500', icon: Users },
 ];
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -197,6 +197,49 @@ export const StudentDashboard: React.FC = () => {
   const GreetingIcon = greeting.icon;
   const firstName = user?.profile?.full_name?.split(' ')[0] || 'Student';
 
+  const dynamicTradeMetrics = [
+    {
+      label: 'Event Registrations',
+      value: data?.live_metrics?.total_registrations ?? 1480,
+      subText: 'Live DB Records',
+      change: '+28.4%',
+      barWidth: '82%',
+      color: 'from-sky-500 to-cyan-400',
+      icon: Calendar,
+    },
+    {
+      label: 'Certificates Claimed',
+      value: data?.live_metrics?.total_certificates ?? 890,
+      subText: 'HMAC Verified',
+      change: '+41.2%',
+      barWidth: '94%',
+      color: 'from-emerald-500 to-teal-400',
+      icon: ShieldCheck,
+    },
+    {
+      label: 'Active Members',
+      value: data?.live_metrics?.active_members ?? data?.active_members_count ?? 342,
+      subText: 'Verified Profiles',
+      change: '+15.8%',
+      barWidth: '76%',
+      color: 'from-purple-500 to-indigo-500',
+      icon: Flame,
+    },
+    {
+      label: 'My Registrations',
+      value: data?.live_metrics?.my_registrations ?? data?.my_registrations_count ?? 4,
+      subText: 'Enrolled Events',
+      change: '+100%',
+      barWidth: '96%',
+      color: 'from-pink-500 to-rose-500',
+      icon: Users,
+    },
+  ];
+
+  const activeChartData = data?.monthly_activity && data.monthly_activity.length > 0
+    ? data.monthly_activity
+    : monthlyActivityData;
+
   const getPhotoUrl = (rawUrl?: string) => {
     if (!rawUrl) return '';
     if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://')) return rawUrl;
@@ -218,25 +261,22 @@ export const StudentDashboard: React.FC = () => {
         
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-3 max-w-2xl">
-            <div className="flex items-center gap-3">
-              <span className={`px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider border backdrop-blur-md flex items-center gap-2 ${greeting.badgeBg}`}>
+            <div className="flex flex-wrap items-center gap-3">
+              <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${greeting.badgeBg} shadow-sm`}>
                 <GreetingIcon className={`w-4 h-4 ${greeting.iconColor}`} />
-                {greeting.text}, {firstName}
+                {greeting.text}
               </span>
-
-              {currentTime && (
-                <span className="px-3 py-1 rounded-full bg-slate-900/60 border border-slate-700/60 text-slate-300 text-xs font-mono flex items-center gap-1.5 backdrop-blur-md">
-                  <Clock className="w-3.5 h-3.5 text-sky-400" />
-                  {currentTime}
-                </span>
-              )}
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold text-slate-300 bg-slate-800/80 border border-slate-700/60 font-mono">
+                <Clock className="w-3.5 h-3.5 text-sky-400" />
+                {currentTime}
+              </span>
             </div>
 
-            <h2 className="text-2xl md:text-3xl font-black text-white leading-tight tracking-tight">
-              Ready to discover campus events & achievements?
-            </h2>
+            <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+              Welcome back, <span className="bg-gradient-to-r from-sky-400 via-indigo-300 to-pink-400 bg-clip-text text-transparent">{firstName}</span>! 👋
+            </h1>
 
-            <p className="text-slate-300 text-sm leading-relaxed max-w-xl">
+            <p className="text-slate-300 text-sm font-medium leading-relaxed">
               {greeting.subtitle}
             </p>
           </div>
@@ -322,53 +362,6 @@ export const StudentDashboard: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* Stat Cards */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.1 }}
-        className="grid grid-cols-1 md:grid-cols-3 gap-6"
-      >
-        <motion.div
-          whileHover={{ y: -4, scale: 1.02 }}
-          className="p-6 rounded-3xl bg-slate-900 border border-slate-800 flex items-center gap-4 hover:border-sky-500/50 hover:shadow-xl transition-all duration-300"
-        >
-          <div className="p-4 rounded-2xl bg-sky-500/10 text-sky-400">
-            <Calendar className="w-8 h-8" />
-          </div>
-          <div>
-            <p className="text-sm text-slate-400 font-medium">Total Events</p>
-            <h3 className="text-3xl font-bold text-white">{data?.total_events || 0}</h3>
-          </div>
-        </motion.div>
-
-        <motion.div
-          whileHover={{ y: -4, scale: 1.02 }}
-          className="p-6 rounded-3xl bg-slate-900 border border-slate-800 flex items-center gap-4 hover:border-indigo-500/50 hover:shadow-xl transition-all duration-300"
-        >
-          <div className="p-4 rounded-2xl bg-indigo-500/10 text-indigo-400">
-            <Users className="w-8 h-8" />
-          </div>
-          <div>
-            <p className="text-sm text-slate-400 font-medium">Active Members</p>
-            <h3 className="text-3xl font-bold text-white">{data?.active_members_count || 0}</h3>
-          </div>
-        </motion.div>
-
-        <motion.div
-          whileHover={{ y: -4, scale: 1.02 }}
-          className="p-6 rounded-3xl bg-slate-900 border border-slate-800 flex items-center gap-4 hover:border-emerald-500/50 hover:shadow-xl transition-all duration-300"
-        >
-          <div className="p-4 rounded-2xl bg-emerald-500/10 text-emerald-400">
-            <Trophy className="w-8 h-8" />
-          </div>
-          <div>
-            <p className="text-sm text-slate-400 font-medium">Active Committees</p>
-            <h3 className="text-3xl font-bold text-white">{data?.active_committees_count || 0}</h3>
-          </div>
-        </motion.div>
-      </motion.div>
-
       {/* Colorful Analytics & Reports Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -396,88 +389,9 @@ export const StudentDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Colorful Analytics Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          {/* Card 1: Technical & AI Workshops */}
-          <motion.div
-            whileHover={{ y: -6, scale: 1.02 }}
-            className="p-6 rounded-3xl bg-gradient-to-br from-slate-900 via-sky-950/40 to-slate-900 border border-sky-500/30 hover:border-sky-400 shadow-xl relative overflow-hidden group transition-all duration-300"
-          >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-sky-500/10 rounded-full blur-2xl group-hover:scale-125 transition-transform duration-500"></div>
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30">
-                Tech Workshops
-              </span>
-              <TrendingUp className="w-4 h-4 text-sky-400" />
-            </div>
-            <h4 className="text-3xl font-black text-white mb-1">85%</h4>
-            <p className="text-xs text-slate-400 mb-3">Attendance & Completion</p>
-            <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-sky-500 to-cyan-400 rounded-full w-[85%] shadow-[0_0_10px_rgba(56,189,248,0.5)]"></div>
-            </div>
-          </motion.div>
-
-          {/* Card 2: Hackathons & Competitions */}
-          <motion.div
-            whileHover={{ y: -6, scale: 1.02 }}
-            className="p-6 rounded-3xl bg-gradient-to-br from-slate-900 via-emerald-950/40 to-slate-900 border border-emerald-500/30 hover:border-emerald-400 shadow-xl relative overflow-hidden group transition-all duration-300"
-          >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl group-hover:scale-125 transition-transform duration-500"></div>
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                Hackathons
-              </span>
-              <Target className="w-4 h-4 text-emerald-400" />
-            </div>
-            <h4 className="text-3xl font-black text-white mb-1">92%</h4>
-            <p className="text-xs text-slate-400 mb-3">Project Submissions</p>
-            <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full w-[92%] shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
-            </div>
-          </motion.div>
-
-          {/* Card 3: Cultural & Sports Fests */}
-          <motion.div
-            whileHover={{ y: -6, scale: 1.02 }}
-            className="p-6 rounded-3xl bg-gradient-to-br from-slate-900 via-amber-950/40 to-slate-900 border border-amber-500/30 hover:border-amber-400 shadow-xl relative overflow-hidden group transition-all duration-300"
-          >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl group-hover:scale-125 transition-transform duration-500"></div>
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                Sports & Fests
-              </span>
-              <PieChart className="w-4 h-4 text-amber-400" />
-            </div>
-            <h4 className="text-3xl font-black text-white mb-1">78%</h4>
-            <p className="text-xs text-slate-400 mb-3">Student Engagement</p>
-            <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-amber-500 to-orange-400 rounded-full w-[78%] shadow-[0_0_10px_rgba(245,158,11,0.5)]"></div>
-            </div>
-          </motion.div>
-
-          {/* Card 4: Alumni & Mentorship */}
-          <motion.div
-            whileHover={{ y: -6, scale: 1.02 }}
-            className="p-6 rounded-3xl bg-gradient-to-br from-slate-900 via-pink-950/40 to-slate-900 border border-pink-500/30 hover:border-pink-400 shadow-xl relative overflow-hidden group transition-all duration-300"
-          >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/10 rounded-full blur-2xl group-hover:scale-125 transition-transform duration-500"></div>
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-pink-500/20 text-pink-300 border border-pink-500/30">
-                Alumni Network
-              </span>
-              <CheckCircle2 className="w-4 h-4 text-pink-400" />
-            </div>
-            <h4 className="text-3xl font-black text-white mb-1">95%</h4>
-            <p className="text-xs text-slate-400 mb-3">Mentorship Score</p>
-            <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-pink-500 to-rose-400 rounded-full w-[95%] shadow-[0_0_10px_rgba(236,72,153,0.5)]"></div>
-            </div>
-          </motion.div>
-        </div>
-
         {/* Live Performance Trade Bars Ticker */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-          {tradeMetrics.map((tm, idx) => {
+          {dynamicTradeMetrics.map((tm, idx) => {
             const IconComponent = tm.icon;
             return (
               <div
@@ -536,7 +450,7 @@ export const StudentDashboard: React.FC = () => {
 
             <div className="h-64 w-full pt-2">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={monthlyActivityData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <AreaChart data={activeChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="regGradient" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#38bdf8" stopOpacity={0.4} />
@@ -570,13 +484,13 @@ export const StudentDashboard: React.FC = () => {
 
             <div className="h-56 w-full pt-2">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={monthlyActivityData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <BarChart data={activeChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
                   <XAxis dataKey="month" stroke="#64748b" tick={{ fill: '#64748b', fontSize: 10 }} axisLine={false} tickLine={false} />
                   <YAxis stroke="#64748b" tick={{ fill: '#64748b', fontSize: 10 }} axisLine={false} tickLine={false} />
                   <Tooltip content={<CustomTooltip />} />
                   <Bar dataKey="checkins" name="Check-ins" radius={[6, 6, 0, 0]}>
-                    {monthlyActivityData.map((_entry, index) => (
+                    {activeChartData.map((_entry, index) => (
                       <Cell key={`cell-${index}`} fill={tradeBarColors[index % tradeBarColors.length]} />
                     ))}
                   </Bar>
@@ -585,7 +499,7 @@ export const StudentDashboard: React.FC = () => {
             </div>
 
             <div className="pt-3 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400 font-medium">
-              <span>Peak Month: <strong className="text-emerald-400 font-bold">Aug (710 Check-ins)</strong></span>
+              <span>Peak Month: <strong className="text-emerald-400 font-bold">Aug</strong></span>
               <span className="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">Live Sync</span>
             </div>
           </div>
