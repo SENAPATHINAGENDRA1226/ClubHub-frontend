@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import api, { getErrorMessage } from '../../services/api';
 import { useRealtime } from '../../context/RealtimeContext';
 import { MessageSquareWarning, CheckCircle2, AlertCircle, Clock, Send } from 'lucide-react';
@@ -62,38 +63,127 @@ export const GrievancePage: React.FC = () => {
       case 'resolved':
         return <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><CheckCircle2 className="w-3.5 h-3.5" /> Resolved</span>;
       case 'in_progress':
-        return <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20"><Clock className="w-3.5 h-3.5" /> In Progress</span>;
+      case 'under_review':
+        return <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20"><Clock className="w-3.5 h-3.5" /> Under Review</span>;
+      case 'rejected':
+        return <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/20"><AlertCircle className="w-3.5 h-3.5" /> Closed</span>;
       default:
         return <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-sky-500/10 text-sky-400 border border-sky-500/20"><AlertCircle className="w-3.5 h-3.5" /> Open</span>;
     }
   };
 
   const getTimeline = (g: any) => {
-    return (
-      <div className="relative mt-6 pt-4 border-t border-slate-800">
-         <div className="absolute top-[28px] left-6 right-6 h-0.5 bg-slate-800 -z-10" />
-         <div className="flex justify-between relative z-10">
-            {/* Submitted */}
-            <div className="flex flex-col items-center">
-               <div className="w-4 h-4 rounded-full bg-rose-500 ring-4 ring-slate-900 mb-2" />
-               <span className="text-[10px] font-bold text-slate-400 uppercase">Submitted</span>
-               {g.submitted_at && <span className="text-[10px] text-slate-500 font-mono mt-0.5">{new Date(g.submitted_at).toLocaleDateString()}</span>}
-            </div>
-            
-            {/* In Progress */}
-            <div className="flex flex-col items-center">
-               <div className={`w-4 h-4 rounded-full ring-4 ring-slate-900 mb-2 transition-colors ${g.status === 'in_progress' || g.status === 'resolved' ? 'bg-amber-500' : 'bg-slate-800'}`} />
-               <span className={`text-[10px] font-bold uppercase ${g.status === 'in_progress' || g.status === 'resolved' ? 'text-amber-400' : 'text-slate-500'}`}>Under Review</span>
-               {g.under_review_at && <span className="text-[10px] text-slate-500 font-mono mt-0.5">{new Date(g.under_review_at).toLocaleDateString()}</span>}
-            </div>
+    const isInProgress = g.status === 'in_progress' || g.status === 'under_review';
+    const isResolved = g.status === 'resolved';
+    const isRejected = g.status === 'rejected';
 
-            {/* Resolved */}
-            <div className="flex flex-col items-center">
-               <div className={`w-4 h-4 rounded-full ring-4 ring-slate-900 mb-2 transition-colors ${g.status === 'resolved' ? 'bg-emerald-500' : 'bg-slate-800'}`} />
-               <span className={`text-[10px] font-bold uppercase ${g.status === 'resolved' ? 'text-emerald-400' : 'text-slate-500'}`}>Resolved</span>
-               {g.resolved_at && <span className="text-[10px] text-slate-500 font-mono mt-0.5">{new Date(g.resolved_at).toLocaleDateString()}</span>}
+    let lineWidth = '0%';
+    let lineGradient = 'from-rose-500 to-rose-500';
+    let lineGlow = 'shadow-[0_0_12px_rgba(244,63,94,0.6)]';
+
+    if (isInProgress) {
+      lineWidth = '50%';
+      lineGradient = 'from-rose-500 via-amber-500 to-amber-400';
+      lineGlow = 'shadow-[0_0_14px_rgba(245,158,11,0.7)]';
+    } else if (isResolved) {
+      lineWidth = '100%';
+      lineGradient = 'from-rose-500 via-amber-400 to-emerald-500';
+      lineGlow = 'shadow-[0_0_16px_rgba(16,185,129,0.8)]';
+    } else if (isRejected) {
+      lineWidth = '100%';
+      lineGradient = 'from-rose-500 to-red-600';
+      lineGlow = 'shadow-[0_0_16px_rgba(225,29,72,0.8)]';
+    }
+
+    return (
+      <div className="relative mt-6 pt-6 border-t border-slate-800/80">
+        {/* Background Track Bar */}
+        <div className="absolute top-[34px] left-8 right-8 h-1 bg-slate-800/90 rounded-full -z-0" />
+
+        {/* Real-time Animated Progress Line with Gradient Glow */}
+        <motion.div
+          initial={{ width: '0%' }}
+          animate={{ width: lineWidth }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          className={`absolute top-[34px] left-8 max-w-[calc(100%-4rem)] h-1 bg-gradient-to-r ${lineGradient} rounded-full z-0 ${lineGlow}`}
+        />
+
+        <div className="flex justify-between relative z-10">
+          {/* Step 1: SUBMITTED */}
+          <div className="flex flex-col items-center group">
+            <div className="relative flex items-center justify-center">
+              <div className="w-5 h-5 rounded-full bg-rose-500 border-2 border-slate-900 shadow-lg shadow-rose-500/40 flex items-center justify-center">
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping opacity-75"></span>
+              </div>
             </div>
-         </div>
+            <span className="text-[11px] font-bold text-rose-400 uppercase tracking-wider mt-2">Submitted</span>
+            {g.submitted_at && (
+              <span className="text-[10px] text-slate-400 font-mono mt-0.5">
+                {new Date(g.submitted_at).toLocaleDateString()}
+              </span>
+            )}
+          </div>
+
+          {/* Step 2: UNDER REVIEW */}
+          <div className="flex flex-col items-center group">
+            <div className="relative flex items-center justify-center">
+              <div
+                className={`w-5 h-5 rounded-full border-2 border-slate-900 shadow-lg transition-all duration-500 flex items-center justify-center ${
+                  isInProgress || isResolved || isRejected
+                    ? 'bg-amber-500 shadow-amber-500/50 scale-110'
+                    : 'bg-slate-800'
+                }`}
+              >
+                {isInProgress && <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping opacity-75"></span>}
+              </div>
+            </div>
+            <span
+              className={`text-[11px] font-bold uppercase tracking-wider mt-2 transition-colors ${
+                isInProgress || isResolved ? 'text-amber-400' : 'text-slate-500'
+              }`}
+            >
+              Under Review
+            </span>
+            {g.under_review_at && (
+              <span className="text-[10px] text-slate-400 font-mono mt-0.5">
+                {new Date(g.under_review_at).toLocaleDateString()}
+              </span>
+            )}
+          </div>
+
+          {/* Step 3: RESOLVED / REJECTED */}
+          <div className="flex flex-col items-center group">
+            <div className="relative flex items-center justify-center">
+              <div
+                className={`w-5 h-5 rounded-full border-2 border-slate-900 shadow-lg transition-all duration-500 flex items-center justify-center ${
+                  isResolved
+                    ? 'bg-emerald-500 shadow-emerald-500/50 scale-110'
+                    : isRejected
+                    ? 'bg-red-500 shadow-red-500/50 scale-110'
+                    : 'bg-slate-800'
+                }`}
+              >
+                {isResolved && <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping opacity-75"></span>}
+              </div>
+            </div>
+            <span
+              className={`text-[11px] font-bold uppercase tracking-wider mt-2 transition-colors ${
+                isResolved
+                  ? 'text-emerald-400'
+                  : isRejected
+                  ? 'text-red-400'
+                  : 'text-slate-500'
+              }`}
+            >
+              {isRejected ? 'Closed' : 'Resolved'}
+            </span>
+            {g.resolved_at && (
+              <span className="text-[10px] text-slate-400 font-mono mt-0.5">
+                {new Date(g.resolved_at).toLocaleDateString()}
+              </span>
+            )}
+          </div>
+        </div>
       </div>
     );
   };
