@@ -81,47 +81,62 @@ export const ManageCertificatesPage: React.FC = () => {
   const [isRevoking, setIsRevoking] = useState(false);
 
   const fetchData = async () => {
+    setLoading(true);
+    let certList: any[] = [];
+    let studentList: Student[] = [];
+    let eventList: Event[] = [];
+
+    // 1. Fetch certificates
     try {
-      setLoading(true);
-      // Fetch certificates
-      const certRes = await api.get('/certificates?limit=200');
-      const certList = certRes.data?.items || (Array.isArray(certRes.data) ? certRes.data : []);
-
-      // Fetch students list (using user endpoint)
-      const studentRes = await api.get('/users?role=student&limit=200');
-      const studentList = studentRes.data?.items || (Array.isArray(studentRes.data) ? studentRes.data : []);
-      setStudents(studentList);
-
-      // Fetch events (using admin endpoint to load all past, current & inactive events)
-      let eventList: Event[] = [];
-      try {
-        const eventRes = await api.get('/events/admin?limit=500&sort_by=event_date&sort_dir=desc');
-        eventList = eventRes.data?.items || (Array.isArray(eventRes.data) ? eventRes.data : []);
-      } catch (e) {
-        const eventRes = await api.get('/events?limit=500');
-        eventList = eventRes.data?.items || (Array.isArray(eventRes.data) ? eventRes.data : []);
-      }
-      setEvents(eventList);
-
-      // Map student details locally for cleaner UI
-      const enrichedCerts = certList.map((c: any) => {
-        const matchingUser = studentList.find((s: any) => s.id === c.student_id || s.profile?.id === c.student_id);
-        return {
-          ...c,
-          student: {
-            full_name: matchingUser?.profile?.full_name || 'Student Profile',
-            email: matchingUser?.email || 'student@csmd-dlides-club.com',
-          }
-        };
-      });
-
-      setCertificates(enrichedCerts);
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to load certificates data');
-    } finally {
-      setLoading(false);
+      const certRes = await api.get('/certificates?limit=500');
+      certList = certRes.data?.items || (Array.isArray(certRes.data) ? certRes.data : []);
+    } catch (e) {
+      console.warn('Failed to load certificates list:', e);
     }
+
+    // 2. Fetch students list (try /users?role=student, fallback to /users)
+    try {
+      const studentRes = await api.get('/users?role=student&limit=500');
+      studentList = studentRes.data?.items || (Array.isArray(studentRes.data) ? studentRes.data : []);
+    } catch (e) {
+      try {
+        const fallbackRes = await api.get('/users?limit=500');
+        const allUsers = fallbackRes.data?.items || (Array.isArray(fallbackRes.data) ? fallbackRes.data : []);
+        studentList = allUsers.filter((u: any) => u.role === 'student' || u.student_profile || !u.role);
+      } catch (err) {
+        console.warn('Failed to load students list:', err);
+      }
+    }
+    setStudents(studentList);
+
+    // 3. Fetch events list (try /events/admin, fallback to /events)
+    try {
+      const eventRes = await api.get('/events/admin?limit=500&sort_by=event_date&sort_dir=desc');
+      eventList = eventRes.data?.items || (Array.isArray(eventRes.data) ? eventRes.data : []);
+    } catch (e) {
+      try {
+        const fallbackRes = await api.get('/events?limit=500');
+        eventList = fallbackRes.data?.items || (Array.isArray(fallbackRes.data) ? fallbackRes.data : []);
+      } catch (err) {
+        console.warn('Failed to load events list:', err);
+      }
+    }
+    setEvents(eventList);
+
+    // 4. Map student details locally
+    const enrichedCerts = certList.map((c: any) => {
+      const matchingUser = studentList.find((s: any) => s.id === c.student_id || s.profile?.id === c.student_id);
+      return {
+        ...c,
+        student: {
+          full_name: matchingUser?.profile?.full_name || 'Student Profile',
+          email: matchingUser?.email || 'student@csmd-dlides-club.com',
+        }
+      };
+    });
+
+    setCertificates(enrichedCerts);
+    setLoading(false);
   };
 
   useEffect(() => {
