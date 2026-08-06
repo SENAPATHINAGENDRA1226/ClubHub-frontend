@@ -22,6 +22,26 @@ interface Event {
   banner_image_url: string | null;
 }
 
+const DEFAULT_EVENT_IMAGES = [
+  'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?q=80&w=800&auto=format&fit=crop',
+];
+
+const getEventBannerUrl = (event: Event, index: number) => {
+  if (event.banner_image_url) {
+    if (event.banner_image_url.startsWith('http://') || event.banner_image_url.startsWith('https://')) {
+      return event.banner_image_url;
+    }
+    const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+    const serverBase = apiBase.replace(/\/api\/?$/, '');
+    return `${serverBase}${event.banner_image_url.startsWith('/') ? '' : '/'}${event.banner_image_url}`;
+  }
+  return DEFAULT_EVENT_IMAGES[index % DEFAULT_EVENT_IMAGES.length];
+};
+
 export const EventsPage: React.FC = () => {
   const navigate = useNavigate();
   const { role } = useAuth();
@@ -269,33 +289,32 @@ export const EventsPage: React.FC = () => {
         ) : (
           <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <AnimatePresence mode="popLayout">
-              {events.map((event) => (
+              {events.map((event, index) => (
                 <motion.div
                   key={event.id}
                   layout
                   initial={{ opacity: 0, scale: 0.95, y: 20 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
+                  whileHover={{ y: -6, transition: { duration: 0.2 } }}
                   exit={{ opacity: 0, scale: 0.95, y: 20 }}
                   transition={{ duration: 0.3 }}
-                  className="group relative flex flex-col bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden hover:border-slate-700 hover:shadow-2xl hover:shadow-black/50 transition-all"
+                  className="group relative flex flex-col bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden hover:border-sky-500/50 hover:shadow-2xl hover:shadow-sky-500/10 transition-all duration-300"
                 >
-                  <div className="h-32 bg-gradient-to-br from-slate-800 to-slate-900 border-b border-slate-800 p-6 flex flex-col justify-end relative overflow-hidden">
-                    {event.banner_image_url && (
-                      <img
-                        src={import.meta.env.VITE_API_BASE_URL?.replace('/api', '') + event.banner_image_url}
-                        alt={event.title}
-                        className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 group-hover:scale-105 transition-all duration-500"
-                      />
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-transparent"></div>
-                    {!event.banner_image_url && (
-                      <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <Calendar className="w-24 h-24 text-white" />
-                      </div>
-                    )}
-                    <h3 className="text-xl font-black text-white relative z-10 leading-tight group-hover:text-sky-400 transition-colors line-clamp-2 pr-16">
-                      {event.title}
-                    </h3>
+                  <div className="h-44 bg-gradient-to-br from-slate-800 to-slate-900 border-b border-slate-800 p-6 flex flex-col justify-end relative overflow-hidden">
+                    <img
+                      src={getEventBannerUrl(event, index)}
+                      alt={event.title}
+                      className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:opacity-90 group-hover:scale-110 transition-all duration-700 ease-out"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent"></div>
+                    <div className="relative z-10 space-y-1">
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-sky-500/20 text-sky-300 border border-sky-500/30 backdrop-blur-md inline-block">
+                        {event.category}
+                      </span>
+                      <h3 className="text-xl font-black text-white leading-tight group-hover:text-sky-400 transition-colors line-clamp-2 pr-12">
+                        {event.title}
+                      </h3>
+                    </div>
                   </div>
 
                   <div className="p-6 flex-1 flex flex-col justify-between">

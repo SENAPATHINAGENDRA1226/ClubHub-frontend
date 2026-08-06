@@ -141,25 +141,48 @@ export const ProfilePage: React.FC = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
+      const cleanLink = (url: string, defaultDomain: string) => {
+        if (!url || !url.trim()) return null;
+        const clean = url.trim();
+        if (clean.startsWith('http://') || clean.startsWith('https://')) return clean;
+        if (clean.startsWith('@')) return `https://${defaultDomain}/${clean.substring(1)}`;
+        if (!clean.includes('.')) {
+          if (defaultDomain === 'linkedin.com') return `https://${defaultDomain}/in/${clean}`;
+          return `https://${defaultDomain}/${clean}`;
+        }
+        return `https://${clean}`;
+      };
+
       const payload = {
-        branch: formData.branch,
-        section: formData.section,
+        full_name: formData.name.trim() || undefined,
+        branch: formData.branch.trim(),
+        section: formData.section.trim(),
         academic_year: formData.academic_year,
-        phone_number: formData.phone_number,
+        phone_number: formData.phone_number.trim(),
         cgpa: formData.cgpa ? parseFloat(formData.cgpa) : null,
-        linkedin_url: formData.linkedin_url.trim() || null,
-        github_url: formData.github_url.trim() || null,
-        instagram_url: formData.instagram_url.trim() || null,
+        linkedin_url: cleanLink(formData.linkedin_url, 'linkedin.com'),
+        github_url: cleanLink(formData.github_url, 'github.com'),
+        instagram_url: cleanLink(formData.instagram_url, 'instagram.com'),
       };
       await api.post('/onboarding/student?force=true', payload);
+      toast.success('Profile updated successfully!');
+      
       // Re-fetch user data to update auth context
       const meRes = await api.get('/auth/me');
       const token = localStorage.getItem('access_token') || '';
       const refresh = localStorage.getItem('refresh_token') || '';
       login(token, refresh, meRes.data, 'student', true);
       setIsEditing(false);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to update profile:', err);
+      const detail = err.response?.data?.detail;
+      if (typeof detail === 'string') {
+        toast.error(detail);
+      } else if (Array.isArray(detail)) {
+        toast.error(detail.map((d: any) => d.msg || d.detail).join(', '));
+      } else {
+        toast.error('Failed to update profile details');
+      }
     } finally {
       setSaving(false);
     }
@@ -384,16 +407,16 @@ export const ProfilePage: React.FC = () => {
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">GitHub URL</label>
-                  <input type="url" name="github_url" value={formData.github_url} onChange={handleInputChange} className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-sky-500" />
+                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">GitHub Profile / Handle</label>
+                  <input type="text" name="github_url" value={formData.github_url} onChange={handleInputChange} placeholder="e.g. github.com/username or @username" className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-sky-500 placeholder-slate-600 text-sm" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">LinkedIn URL</label>
-                  <input type="url" name="linkedin_url" value={formData.linkedin_url} onChange={handleInputChange} className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-sky-500" />
+                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">LinkedIn Profile / Handle</label>
+                  <input type="text" name="linkedin_url" value={formData.linkedin_url} onChange={handleInputChange} placeholder="e.g. linkedin.com/in/username or username" className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-sky-500 placeholder-slate-600 text-sm" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Instagram URL</label>
-                  <input type="url" name="instagram_url" value={formData.instagram_url} onChange={handleInputChange} className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-sky-500" />
+                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Instagram Profile / Handle</label>
+                  <input type="text" name="instagram_url" value={formData.instagram_url} onChange={handleInputChange} placeholder="e.g. instagram.com/username or @username" className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-sky-500 placeholder-slate-600 text-sm" />
                 </div>
               </div>
             </div>

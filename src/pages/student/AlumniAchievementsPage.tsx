@@ -9,6 +9,24 @@ import { ManageableGrid, ManageableCardOverlay, DeleteConfirmModal } from '../..
 import { Skeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/EmptyState';
 
+const DEFAULT_ALUMNI_PHOTOS = [
+  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=400&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=400&auto=format&fit=crop',
+];
+
+const getAlumniPhotoUrl = (al: any, index: number) => {
+  if (al.photo_url) {
+    if (al.photo_url.startsWith('http://') || al.photo_url.startsWith('https://')) return al.photo_url;
+    const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+    const serverBase = apiBase.replace(/\/api\/?$/, '');
+    return `${serverBase}${al.photo_url.startsWith('/') ? '' : '/'}${al.photo_url}`;
+  }
+  return DEFAULT_ALUMNI_PHOTOS[index % DEFAULT_ALUMNI_PHOTOS.length];
+};
+
 export const AlumniAchievementsPage: React.FC = () => {
   const location = useLocation();
   const { role } = useAuth();
@@ -321,23 +339,24 @@ export const AlumniAchievementsPage: React.FC = () => {
               />
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {alumni.map(al => (
+                {alumni.map((al, idx) => (
                   <motion.div
                     key={al.id}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="relative bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden hover:border-slate-700 hover:shadow-2xl hover:shadow-black transition-all flex flex-col group"
+                    initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    whileHover={{ y: -6, scale: 1.02, transition: { duration: 0.2 } }}
+                    className="relative bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden hover:border-blue-500/50 hover:shadow-2xl hover:shadow-blue-500/10 transition-all flex flex-col group"
                   >
                     <div className="p-6 pb-0 flex items-start gap-4 mb-4 pr-12">
-                      <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-slate-700 bg-slate-800 shrink-0">
-                        {al.photo_url ? (
-                          <img src={import.meta.env.VITE_API_BASE_URL?.replace('/api', '') + al.photo_url} alt={al.full_name} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-xl font-bold text-slate-500">{al.full_name.charAt(0)}</div>
-                        )}
+                      <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-slate-700 bg-slate-800 shrink-0 shadow-lg group-hover:border-blue-400 transition-colors">
+                        <img
+                          src={getAlumniPhotoUrl(al, idx)}
+                          alt={al.full_name}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
                       </div>
                       <div>
-                        <h3 className="text-lg font-bold text-white leading-tight">{al.full_name}</h3>
+                        <h3 className="text-lg font-bold text-white leading-tight group-hover:text-blue-400 transition-colors">{al.full_name}</h3>
                         <p className="text-sm text-blue-400 font-semibold mt-0.5">{al.current_company || 'Alumni'}</p>
                         <p className="text-xs text-slate-500 mt-1">{al.branch} • Class of {al.graduation_year}</p>
                       </div>
