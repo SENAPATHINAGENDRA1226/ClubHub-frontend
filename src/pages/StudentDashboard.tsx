@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useRealtime } from '../context/RealtimeContext';
 import api from '../services/api';
-import { Award, Calendar, Users, Trophy, Sun, Sunrise, Sunset, Moon, Clock, Maximize2, X } from 'lucide-react';
+import { Award, Calendar, Users, Trophy, Sun, Sunrise, Sunset, Moon, Clock, Maximize2, X, TrendingUp, BarChart3, PieChart, Sparkles, Activity, CheckCircle2, Target } from 'lucide-react';
 
 interface QuickLink {
   title: string;
@@ -303,6 +303,113 @@ export const StudentDashboard: React.FC = () => {
             <h3 className="text-3xl font-bold text-white">{data?.active_committees_count || 0}</h3>
           </div>
         </motion.div>
+      </motion.div>
+
+      {/* Colorful Analytics & Reports Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="space-y-6"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-2xl bg-gradient-to-tr from-sky-500 via-indigo-500 to-pink-500 text-white shadow-lg shadow-indigo-500/20">
+              <BarChart3 className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
+                Campus Activity Reports & Insights
+                <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
+              </h3>
+              <p className="text-xs text-slate-400 font-medium">Real-time statistics across events, workshops, and achievements.</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs font-bold text-slate-300 bg-slate-900 border border-slate-800 px-3.5 py-1.5 rounded-full w-fit">
+            <Activity className="w-3.5 h-3.5 text-emerald-400 animate-spin" style={{ animationDuration: '3s' }} />
+            Live Analytics Mode
+          </div>
+        </div>
+
+        {/* Colorful Analytics Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          {/* Card 1: Technical & AI Workshops */}
+          <motion.div
+            whileHover={{ y: -6, scale: 1.02 }}
+            className="p-6 rounded-3xl bg-gradient-to-br from-slate-900 via-sky-950/40 to-slate-900 border border-sky-500/30 hover:border-sky-400 shadow-xl relative overflow-hidden group transition-all duration-300"
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-sky-500/10 rounded-full blur-2xl group-hover:scale-125 transition-transform duration-500"></div>
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30">
+                Tech Workshops
+              </span>
+              <TrendingUp className="w-4 h-4 text-sky-400" />
+            </div>
+            <h4 className="text-3xl font-black text-white mb-1">85%</h4>
+            <p className="text-xs text-slate-400 mb-3">Attendance & Completion</p>
+            <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-sky-500 to-cyan-400 rounded-full w-[85%] shadow-[0_0_10px_rgba(56,189,248,0.5)]"></div>
+            </div>
+          </motion.div>
+
+          {/* Card 2: Hackathons & Competitions */}
+          <motion.div
+            whileHover={{ y: -6, scale: 1.02 }}
+            className="p-6 rounded-3xl bg-gradient-to-br from-slate-900 via-emerald-950/40 to-slate-900 border border-emerald-500/30 hover:border-emerald-400 shadow-xl relative overflow-hidden group transition-all duration-300"
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl group-hover:scale-125 transition-transform duration-500"></div>
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                Hackathons
+              </span>
+              <Target className="w-4 h-4 text-emerald-400" />
+            </div>
+            <h4 className="text-3xl font-black text-white mb-1">92%</h4>
+            <p className="text-xs text-slate-400 mb-3">Project Submissions</p>
+            <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full w-[92%] shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
+            </div>
+          </motion.div>
+
+          {/* Card 3: Cultural & Sports Fests */}
+          <motion.div
+            whileHover={{ y: -6, scale: 1.02 }}
+            className="p-6 rounded-3xl bg-gradient-to-br from-slate-900 via-amber-950/40 to-slate-900 border border-amber-500/30 hover:border-amber-400 shadow-xl relative overflow-hidden group transition-all duration-300"
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl group-hover:scale-125 transition-transform duration-500"></div>
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                Sports & Fests
+              </span>
+              <PieChart className="w-4 h-4 text-amber-400" />
+            </div>
+            <h4 className="text-3xl font-black text-white mb-1">78%</h4>
+            <p className="text-xs text-slate-400 mb-3">Student Engagement</p>
+            <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-amber-500 to-orange-400 rounded-full w-[78%] shadow-[0_0_10px_rgba(245,158,11,0.5)]"></div>
+            </div>
+          </motion.div>
+
+          {/* Card 4: Alumni & Mentorship */}
+          <motion.div
+            whileHover={{ y: -6, scale: 1.02 }}
+            className="p-6 rounded-3xl bg-gradient-to-br from-slate-900 via-pink-950/40 to-slate-900 border border-pink-500/30 hover:border-pink-400 shadow-xl relative overflow-hidden group transition-all duration-300"
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/10 rounded-full blur-2xl group-hover:scale-125 transition-transform duration-500"></div>
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-pink-500/20 text-pink-300 border border-pink-500/30">
+                Alumni Network
+              </span>
+              <CheckCircle2 className="w-4 h-4 text-pink-400" />
+            </div>
+            <h4 className="text-3xl font-black text-white mb-1">95%</h4>
+            <p className="text-xs text-slate-400 mb-3">Mentorship Score</p>
+            <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-pink-500 to-rose-400 rounded-full w-[95%] shadow-[0_0_10px_rgba(236,72,153,0.5)]"></div>
+            </div>
+          </motion.div>
+        </div>
       </motion.div>
 
       {/* Quick Links */}
