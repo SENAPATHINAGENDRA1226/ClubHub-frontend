@@ -134,10 +134,13 @@ export const VerifyRegistrationsPage: React.FC = () => {
     const unsubscribe = subscribe('registrations', () => {
       if (selectedEventId) {
         fetchStats(selectedEventId);
+        if (mode === 'list') {
+          fetchEventRegistrations(selectedEventId);
+        }
       }
     });
     return () => unsubscribe();
-  }, [subscribe, selectedEventId, fetchStats]);
+  }, [subscribe, selectedEventId, fetchStats, mode]);
 
   // Handle QR Scan
   const handleScanSuccess = async (decodedText: string) => {
@@ -152,12 +155,43 @@ export const VerifyRegistrationsPage: React.FC = () => {
       // Ensure the scanned QR is for the selected event
       if (res.data.event_id !== selectedEventId) {
         setErrorMsg(`Scanned QR is for a different event: ${res.data.event_title}`);
+        setTimeout(() => setErrorMsg(null), 3000);
       } else {
         setPreviewData(res.data);
         setAchievementForm({
           position: res.data.achievement_position || 'none',
           override_url: res.data.computed_certificate_url || ''
         });
+
+        // Auto confirm if not already verified
+        if (!res.data.already_verified) {
+          try {
+            await api.post('/verify/confirm', { registration_id: res.data.registration_id });
+            toast.success(`Checked in ${res.data.student_name} successfully!`);
+            
+            // Add to session trail
+            setSessionTrail(prev => [{
+              id: res.data.registration_id,
+              name: res.data.student_name,
+              regNum: res.data.registration_number,
+              timestamp: new Date(),
+              status: 'verified' as const
+            }, ...prev].slice(0, 10));
+
+            // Auto dismiss after 2 seconds
+            setTimeout(() => {
+              setPreviewData(null);
+            }, 2000);
+          } catch (confirmErr) {
+            setErrorMsg('Auto check-in confirmation failed.');
+            setTimeout(() => setErrorMsg(null), 3000);
+          }
+        } else {
+          toast.error(`${res.data.student_name} is already checked in!`);
+          setTimeout(() => {
+            setPreviewData(null);
+          }, 2500);
+        }
       }
     } catch (err: any) {
       if (err.response?.status === 404) {
