@@ -24,6 +24,8 @@ import {
 } from 'recharts';
 import api from '../../services/api';
 import { Skeleton } from '../../components/ui/Skeleton';
+import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 
 interface TimeSeriesPoint {
   month: string;
@@ -47,6 +49,9 @@ interface AdminDashboardData {
 export const AdminDashboardPage: React.FC = () => {
   const [data, setData] = useState<AdminDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const { theme } = useTheme();
+  const { user } = useAuth();
+  const adminName = user?.profile?.full_name || user?.email?.split('@')[0] || 'Administrator';
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -135,6 +140,21 @@ export const AdminDashboardPage: React.FC = () => {
             <h1 className="text-3xl font-black text-white tracking-tight">Admin Control Center</h1>
             <p className="text-slate-400 text-sm mt-1">Realtime participation, event metrics, and campus growth trends.</p>
           </div>
+
+          {/* Admin User Profile Card */}
+          <div className="shrink-0 flex items-center gap-3.5 bg-slate-900/80 p-3.5 rounded-2xl border border-slate-700/60 shadow-xl backdrop-blur-md">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white font-black text-lg shadow-md shrink-0">
+              {adminName.charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <h4 className="text-sm font-black text-white leading-tight">{adminName}</h4>
+              <p className="text-xs text-sky-400 font-semibold capitalize mt-0.5">{user?.role || 'Admin'} Access</p>
+              <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-bold mt-0.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                Active Account
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -196,11 +216,14 @@ export const AdminDashboardPage: React.FC = () => {
                       <stop offset="95%" stopColor="#38bdf8" stopOpacity={0.0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                  <XAxis dataKey="month" stroke="#64748b" tick={{ fill: '#94a3b8', fontSize: 12 }} />
-                  <YAxis stroke="#64748b" tick={{ fill: '#94a3b8', fontSize: 12 }} allowDecimals={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={theme === 'light' ? '#e2e8f0' : '#1e293b'} />
+                  <XAxis dataKey="month" stroke={theme === 'light' ? '#94a3b8' : '#64748b'} tick={{ fill: theme === 'light' ? '#475569' : '#94a3b8', fontSize: 12 }} />
+                  <YAxis stroke={theme === 'light' ? '#94a3b8' : '#64748b'} tick={{ fill: theme === 'light' ? '#475569' : '#94a3b8', fontSize: 12 }} allowDecimals={false} />
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', color: '#f8fafc' }}
+                    contentStyle={theme === 'light' 
+                      ? { backgroundColor: '#ffffff', borderColor: '#e2e8f0', borderRadius: '12px', color: '#1e293b', boxShadow: '0 8px 30px -4px rgba(0,0,0,0.08)' }
+                      : { backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', color: '#f8fafc' }
+                    }
                     itemStyle={{ color: '#38bdf8' }}
                   />
                   <Area type="monotone" dataKey="value" stroke="#38bdf8" strokeWidth={3} fillOpacity={1} fill="url(#regGrad)" name="Registrations" />
@@ -237,11 +260,14 @@ export const AdminDashboardPage: React.FC = () => {
             {data?.most_popular_events && data.most_popular_events.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data.most_popular_events} layout="vertical" margin={{ top: 10, right: 20, left: 20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                  <XAxis type="number" stroke="#64748b" tick={{ fill: '#94a3b8', fontSize: 12 }} allowDecimals={false} />
-                  <YAxis type="category" dataKey="label" stroke="#64748b" tick={{ fill: '#94a3b8', fontSize: 12 }} width={100} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={theme === 'light' ? '#e2e8f0' : '#1e293b'} />
+                  <XAxis type="number" stroke={theme === 'light' ? '#94a3b8' : '#64748b'} tick={{ fill: theme === 'light' ? '#475569' : '#94a3b8', fontSize: 12 }} allowDecimals={false} />
+                  <YAxis type="category" dataKey="label" stroke={theme === 'light' ? '#94a3b8' : '#64748b'} tick={{ fill: theme === 'light' ? '#475569' : '#94a3b8', fontSize: 12 }} width={100} />
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', color: '#f8fafc' }}
+                    contentStyle={theme === 'light'
+                      ? { backgroundColor: '#ffffff', borderColor: '#e2e8f0', borderRadius: '12px', color: '#1e293b', boxShadow: '0 8px 30px -4px rgba(0,0,0,0.08)' }
+                      : { backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', color: '#f8fafc' }
+                    }
                     itemStyle={{ color: '#818cf8' }}
                   />
                   <Bar dataKey="value" fill="#6366f1" radius={[0, 8, 8, 0]} name="Registrations" />

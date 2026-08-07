@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import api, { getErrorMessage } from '../../services/api';
 import { Lock, Mail, Sparkles, User, UserCheck, Compass, Code } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 export const SignupPage: React.FC = () => {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ export const SignupPage: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const { theme } = useTheme();
 
   useEffect(() => {
     const prefillEmail = searchParams.get('email');
@@ -63,7 +65,7 @@ export const SignupPage: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-950 font-sans selection:bg-sky-500 selection:text-white">
+    <div className={`flex min-h-screen font-sans selection:bg-sky-500 selection:text-white ${theme === 'light' ? 'auth-page-bg' : 'bg-slate-950'}`}>
       {/* Left Brand Panel */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-sky-950 p-12 flex-col justify-between border-r border-slate-800/80">
         <div className="absolute top-1/4 -left-20 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -153,7 +155,7 @@ export const SignupPage: React.FC = () => {
             <p className="text-sm text-slate-400">Fill in your details to get started</p>
           </div>
 
-          <div className="bg-slate-900/90 border border-slate-800 p-8 rounded-3xl shadow-2xl backdrop-blur-xl space-y-6">
+          <div className={`p-8 rounded-3xl shadow-2xl backdrop-blur-xl space-y-6 ${theme === 'light' ? 'auth-card' : 'bg-slate-900/90 border border-slate-800'}`}>
             {errorMsg && (
               <div className="p-4 rounded-xl bg-rose-950/80 border border-rose-800/60 text-rose-200 text-xs flex items-start gap-3">
                 <span className="w-2 h-2 rounded-full bg-rose-400 mt-1 shrink-0"></span>

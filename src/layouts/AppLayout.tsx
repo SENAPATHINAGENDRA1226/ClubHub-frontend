@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -62,6 +62,16 @@ export const AppLayout: React.FC = () => {
   const { subscribe } = useRealtime();
   const { theme, toggleTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 1024);
+  const themeIconRef = useRef<HTMLSpanElement>(null);
+
+  const handleThemeToggle = () => {
+    if (themeIconRef.current) {
+      themeIconRef.current.classList.remove('theme-icon-animate');
+      void themeIconRef.current.offsetWidth; // force reflow
+      themeIconRef.current.classList.add('theme-icon-animate');
+    }
+    toggleTheme();
+  };
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
@@ -100,11 +110,16 @@ export const AppLayout: React.FC = () => {
       <Toaster 
         position="top-right" 
         toastOptions={{
-          className: 'bg-slate-900 border border-slate-800 text-white shadow-xl rounded-xl',
-          style: {
+          className: 'shadow-xl rounded-xl',
+          style: theme === 'dark' ? {
             background: '#0f172a',
             color: '#f1f5f9',
             border: '1px solid #1e293b'
+          } : {
+            background: '#ffffff',
+            color: '#1e293b',
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 8px 30px -4px rgba(0,0,0,0.08)'
           }
         }} 
       />
@@ -212,20 +227,21 @@ export const AppLayout: React.FC = () => {
           <div className="flex items-center gap-3">
             {/* Theme Toggle Button */}
             <button
-              onClick={toggleTheme}
+              onClick={handleThemeToggle}
               className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all border border-slate-700 flex items-center gap-2 text-xs font-semibold shadow-md"
               title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             >
-              {theme === 'dark' ? (
-                <>
+              <span ref={themeIconRef} className="inline-flex">
+                {theme === 'dark' ? (
                   <Sun className="w-4 h-4 text-amber-400" />
-                  <span className="hidden md:inline text-amber-400">Light Mode</span>
-                </>
-              ) : (
-                <>
+                ) : (
                   <Moon className="w-4 h-4 text-indigo-500" />
-                  <span className="hidden md:inline text-indigo-600">Dark Mode</span>
-                </>
+                )}
+              </span>
+              {theme === 'dark' ? (
+                <span className="hidden md:inline text-amber-400">Light Mode</span>
+              ) : (
+                <span className="hidden md:inline text-indigo-600">Dark Mode</span>
               )}
             </button>
 

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useRealtime } from '../context/RealtimeContext';
+import { useTheme } from '../context/ThemeContext';
 import api from '../services/api';
 import { Award, Calendar, Users, Trophy, Sun, Sunrise, Sunset, Moon, Clock, Maximize2, X, BarChart3, Sparkles, Activity, ArrowUpRight, LineChart as LineChartIcon, Layers, ShieldCheck, Flame } from 'lucide-react';
 import {
@@ -123,30 +124,33 @@ const getTimeGreeting = () => {
 export const StudentDashboard: React.FC = () => {
   const { user } = useAuth();
   const { subscribe } = useRealtime();
+  const { theme } = useTheme();
   const [data, setData] = useState<DashboardData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
   const [currentTime, setCurrentTime] = useState<string>('');
-  const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
-
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      setCurrentTime(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-    };
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
-  }, []);
+  const [isPhotoModalOpen, setIsPhotoModalOpen] = useState<boolean>(false);
 
   const fetchDashboardData = useCallback(async () => {
     try {
-      const response = await api.get('/dashboard/student');
-      setData(response.data);
-    } catch (error) {
-      console.error('Failed to fetch dashboard data:', error);
+      const res = await api.get('/dashboard/student');
+      setData(res.data);
+    } catch (err) {
+      console.error('Failed to fetch dashboard data:', err);
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  useEffect(() => {
+    const updateClock = () => {
+      const now = new Date();
+      setCurrentTime(
+        now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+      );
+    };
+    updateClock();
+    const timer = setInterval(updateClock, 1000);
+    return () => clearInterval(timer);
   }, []);
 
   useEffect(() => {
@@ -184,7 +188,7 @@ export const StudentDashboard: React.FC = () => {
 
   const greeting = getTimeGreeting();
   const GreetingIcon = greeting.icon;
-  const firstName = user?.profile?.full_name?.split(' ')[0] || 'Student';
+  const firstName = user?.profile?.full_name?.split(' ')[0] || user?.email?.split('@')[0] || 'Student';
 
   const dynamicTradeMetrics = [
     {
@@ -450,9 +454,9 @@ export const StudentDashboard: React.FC = () => {
                       <stop offset="95%" stopColor="#818cf8" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                  <XAxis dataKey="month" stroke="#64748b" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} />
-                  <YAxis stroke="#64748b" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={theme === 'light' ? '#e2e8f0' : '#1e293b'} vertical={false} />
+                  <XAxis dataKey="month" stroke={theme === 'light' ? '#94a3b8' : '#64748b'} tick={{ fill: theme === 'light' ? '#475569' : '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis stroke={theme === 'light' ? '#94a3b8' : '#64748b'} tick={{ fill: theme === 'light' ? '#475569' : '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} />
                   <Tooltip content={<CustomTooltip />} />
                   <Area type="monotone" dataKey="registrations" name="registrations" stroke="#38bdf8" strokeWidth={3} fillOpacity={1} fill="url(#regGradient)" />
                   <Area type="monotone" dataKey="certificates" name="certificates" stroke="#818cf8" strokeWidth={3} fillOpacity={1} fill="url(#certGradient)" />
@@ -474,9 +478,9 @@ export const StudentDashboard: React.FC = () => {
             <div className="h-56 w-full pt-2">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={activeChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                  <XAxis dataKey="month" stroke="#64748b" tick={{ fill: '#64748b', fontSize: 10 }} axisLine={false} tickLine={false} />
-                  <YAxis stroke="#64748b" tick={{ fill: '#64748b', fontSize: 10 }} axisLine={false} tickLine={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={theme === 'light' ? '#e2e8f0' : '#1e293b'} vertical={false} />
+                  <XAxis dataKey="month" stroke={theme === 'light' ? '#94a3b8' : '#64748b'} tick={{ fill: theme === 'light' ? '#475569' : '#64748b', fontSize: 10 }} axisLine={false} tickLine={false} />
+                  <YAxis stroke={theme === 'light' ? '#94a3b8' : '#64748b'} tick={{ fill: theme === 'light' ? '#475569' : '#64748b', fontSize: 10 }} axisLine={false} tickLine={false} />
                   <Tooltip content={<CustomTooltip />} />
                   <Bar dataKey="checkins" name="Check-ins" radius={[6, 6, 0, 0]}>
                     {activeChartData.map((_entry, index) => (

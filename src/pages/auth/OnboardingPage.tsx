@@ -13,6 +13,7 @@ import {
   Phone,
   Sparkles,
 } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 export const OnboardingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ export const OnboardingPage: React.FC = () => {
   const [step, setStep] = useState<number>(1);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const { theme } = useTheme();
 
   // Form Fields
   const [branch, setBranch] = useState('CSE');
@@ -206,8 +208,8 @@ export const OnboardingPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-6 selection:bg-sky-500 selection:text-white">
-      <div className="w-full max-w-2xl bg-slate-900/90 border border-slate-800 p-8 sm:p-10 rounded-3xl shadow-2xl backdrop-blur-xl space-y-8 relative overflow-hidden">
+    <div className={`min-h-screen text-slate-100 flex items-center justify-center p-6 selection:bg-sky-500 selection:text-white ${theme === 'light' ? 'auth-page-bg' : 'bg-slate-950'}`}>
+      <div className={`w-full max-w-2xl p-8 sm:p-10 rounded-3xl shadow-2xl backdrop-blur-xl space-y-8 relative overflow-hidden ${theme === 'light' ? 'auth-card' : 'bg-slate-900/90 border border-slate-800'}`}>
         {/* Top Glow */}
         <div className="absolute top-0 right-0 w-80 h-80 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
 

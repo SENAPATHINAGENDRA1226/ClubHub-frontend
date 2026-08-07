@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import { UserRole } from '../../types/auth';
 import { Lock, Mail, Shield, Sparkles, UserCheck, Users, AlertTriangle, UserX, ArrowRight, Compass, Code } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ export const LoginPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [popupModal, setPopupModal] = useState<'ACCOUNT_NOT_FOUND' | 'INVALID_CREDENTIALS' | null>(null);
+  const { theme } = useTheme();
 
   const handleTabChange = (tab: UserRole) => {
     setActiveTab(tab);
@@ -134,7 +136,7 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-950 font-sans selection:bg-sky-500 selection:text-white">
+    <div className={`flex min-h-screen font-sans selection:bg-sky-500 selection:text-white ${theme === 'light' ? 'auth-page-bg' : 'bg-slate-950'}`}>
       {/* Left Brand Panel */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-sky-950 p-12 flex-col justify-between border-r border-slate-800/80">
         {/* Glow Effects */}
@@ -275,7 +277,7 @@ export const LoginPage: React.FC = () => {
           </div>
 
           {/* Main Card Container */}
-          <div className="bg-slate-900/90 border border-slate-800 p-8 rounded-3xl shadow-2xl backdrop-blur-xl space-y-6">
+          <div className={`p-8 rounded-3xl shadow-2xl backdrop-blur-xl space-y-6 ${theme === 'light' ? 'auth-card' : 'bg-slate-900/90 border border-slate-800'}`}>
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-5">
