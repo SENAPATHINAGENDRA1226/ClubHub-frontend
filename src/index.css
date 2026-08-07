@@ -282,17 +282,8 @@ html.light .bg-sky-600.text-white {
 }
 
 /* ---- Cards with colored gradients — keep vivid ---- */
-html.light [class*="from-sky-"],
-html.light [class*="from-emerald-"],
-html.light [class*="from-purple-"],
-html.light [class*="from-pink-"],
-html.light [class*="from-amber-"],
-html.light [class*="from-rose-"],
-html.light [class*="from-indigo-"],
-html.light [class*="from-teal-"],
-html.light [class*="from-cyan-"] {
-  /* Keep vibrant gradient cards — don't override */
-}
+/* Note: Vibrant gradient card classes from Tailwind are preserved by default without explicit light mode overrides */
+
 
 /* ---- Recharts / Chart containers ---- */
 html.light .recharts-cartesian-grid line {
