@@ -9,6 +9,7 @@ import { Calendar, MapPin, Clock, Users, ArrowRight, Bell, X } from 'lucide-reac
 import { ManageableGrid, ManageableCardOverlay, DeleteConfirmModal } from '../../components/ManageableGrid';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { getMediaUrl } from '../../utils/media';
 
 interface Event {
   id: string;
@@ -32,12 +33,7 @@ const DEFAULT_EVENT_IMAGES = [
 
 const getEventBannerUrl = (event: Event, index: number) => {
   if (event.banner_image_url) {
-    if (event.banner_image_url.startsWith('http://') || event.banner_image_url.startsWith('https://')) {
-      return event.banner_image_url;
-    }
-    const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
-    const serverBase = apiBase.replace(/\/api\/?$/, '');
-    return `${serverBase}${event.banner_image_url.startsWith('/') ? '' : '/'}${event.banner_image_url}`;
+    return getMediaUrl(event.banner_image_url);
   }
   return DEFAULT_EVENT_IMAGES[index % DEFAULT_EVENT_IMAGES.length];
 };

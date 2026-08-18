@@ -25,6 +25,7 @@ import {
 import toast, { Toaster } from 'react-hot-toast';
 import { useRealtime } from '../context/RealtimeContext';
 import { useTheme } from '../context/ThemeContext';
+import { getMediaUrl } from '../utils/media';
 
 const studentNavItems = [
   { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
@@ -245,15 +246,30 @@ export const AppLayout: React.FC = () => {
               )}
             </button>
 
-            <div className="text-right hidden sm:block">
-              <span className="block text-sm font-bold text-white">
-                {user?.profile?.full_name || user?.email}
-              </span>
-              {user?.profile && (
-                <span className="block text-xs text-slate-400">
-                  {user.profile.branch} &bull; {user.profile.academic_year}
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-sky-500/50 bg-slate-800 shrink-0 flex items-center justify-center text-sky-400 font-black text-sm shadow-md">
+                {user?.profile?.profile_photo_url ? (
+                  <img
+                    src={getMediaUrl(user.profile.profile_photo_url)}
+                    alt={user.profile.full_name || 'User Avatar'}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span>
+                    {user?.profile?.full_name ? user.profile.full_name.charAt(0).toUpperCase() : user?.email?.charAt(0).toUpperCase()}
+                  </span>
+                )}
+              </div>
+              <div className="text-right hidden sm:block">
+                <span className="block text-sm font-bold text-white leading-tight">
+                  {user?.profile?.full_name || user?.email}
                 </span>
-              )}
+                {user?.profile && (
+                  <span className="block text-[11px] text-slate-400 font-medium">
+                    {user.profile.branch} &bull; {user.profile.academic_year}
+                  </span>
+                )}
+              </div>
             </div>
             
             <button

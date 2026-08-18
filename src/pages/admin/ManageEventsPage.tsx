@@ -21,6 +21,8 @@ import {
   ManageableCardOverlay,
   DeleteConfirmModal
 } from '../../components/ManageableGrid';
+import { Upload } from 'lucide-react';
+import { getMediaUrl } from '../../utils/media';
 
 interface Event {
   id: string;
@@ -69,6 +71,29 @@ export const ManageEventsPage: React.FC = () => {
   // Delete State
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
+
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingBanner(true);
+    const form = new FormData();
+    form.append('file', file);
+
+    try {
+      const res = await api.post('/media/upload', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setFormData(prev => ({ ...prev, banner_image_url: res.data.file_url }));
+      toast.success('Event banner photo uploaded!');
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to upload banner photo');
+    } finally {
+      setUploadingBanner(false);
+    }
+  };
 
   const fetchEvents = async () => {
     try {
@@ -252,7 +277,7 @@ export const ManageEventsPage: React.FC = () => {
               {/* Event Image Banner */}
               <div className="relative h-40 bg-slate-950 overflow-hidden">
                 {event.banner_image_url ? (
-                  <img src={event.banner_image_url} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <img src={getMediaUrl(event.banner_image_url)} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 ) : (
                   <div className="w-full h-full bg-gradient-to-br from-slate-900 via-slate-950 to-sky-950 flex items-center justify-center">
                     <Sparkles className="w-10 h-10 text-sky-500/30" />
@@ -417,14 +442,27 @@ export const ManageEventsPage: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Banner Image URL</label>
-                    <input
-                      type="url"
-                      value={formData.banner_image_url}
-                      onChange={(e) => setFormData({ ...formData, banner_image_url: e.target.value })}
-                      placeholder="https://images.unsplash.com/..."
-                      className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-sky-500"
-                    />
+                    <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Banner Image (URL or Upload File)</label>
+                    <div className="flex gap-2 items-center">
+                      <input
+                        type="text"
+                        value={formData.banner_image_url}
+                        onChange={(e) => setFormData({ ...formData, banner_image_url: e.target.value })}
+                        placeholder="https://images.unsplash.com/... or upload below"
+                        className="flex-1 px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-sky-500"
+                      />
+                      <label className="px-4 py-3 bg-slate-800 hover:bg-slate-700 text-sky-400 border border-slate-700 rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer shrink-0 transition-colors">
+                        {uploadingBanner ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                        <span>{uploadingBanner ? 'Uploading...' : 'Upload'}</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleBannerUpload}
+                          disabled={uploadingBanner}
+                        />
+                      </label>
+                    </div>
                   </div>
                 </div>
 

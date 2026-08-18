@@ -8,6 +8,7 @@ import { Trophy, GraduationCap, Linkedin, Award, Star, X } from 'lucide-react';
 import { ManageableGrid, ManageableCardOverlay, DeleteConfirmModal } from '../../components/ManageableGrid';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { getMediaUrl } from '../../utils/media';
 
 const DEFAULT_ALUMNI_PHOTOS = [
   'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop',
@@ -19,10 +20,7 @@ const DEFAULT_ALUMNI_PHOTOS = [
 
 const getAlumniPhotoUrl = (al: any, index: number) => {
   if (al.photo_url) {
-    if (al.photo_url.startsWith('http://') || al.photo_url.startsWith('https://')) return al.photo_url;
-    const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
-    const serverBase = apiBase.replace(/\/api\/?$/, '');
-    return `${serverBase}${al.photo_url.startsWith('/') ? '' : '/'}${al.photo_url}`;
+    return getMediaUrl(al.photo_url);
   }
   return DEFAULT_ALUMNI_PHOTOS[index % DEFAULT_ALUMNI_PHOTOS.length];
 };

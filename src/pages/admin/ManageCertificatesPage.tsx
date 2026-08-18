@@ -129,8 +129,8 @@ export const ManageCertificatesPage: React.FC = () => {
       return {
         ...c,
         student: {
-          full_name: matchingUser?.profile?.full_name || 'Student Profile',
-          email: matchingUser?.email || 'student@csmd-dlides-club.com',
+          full_name: matchingUser?.profile?.full_name || (c.student?.full_name || 'Student Profile'),
+          email: matchingUser?.email || (c.student?.email || 'student@csmd-dlides-club.com'),
         }
       };
     });
@@ -159,7 +159,11 @@ export const ManageCertificatesPage: React.FC = () => {
         file_url: formData.file_url || null,
       });
 
-      toast.success('Certificate issued successfully');
+      if (formData.student_id === 'all') {
+        toast.success('Certificates issued to all students!');
+      } else {
+        toast.success('Certificate issued successfully');
+      }
       setIsModalOpen(false);
       setFormData({
         student_id: '',
@@ -224,11 +228,10 @@ export const ManageCertificatesPage: React.FC = () => {
 
   const filteredCerts = certificates.filter((c) => {
     const term = search.toLowerCase();
-    return (
-      c.student?.full_name.toLowerCase().includes(term) ||
-      c.student?.email.toLowerCase().includes(term) ||
-      c.event?.title.toLowerCase().includes(term)
-    );
+    const fullName = (c.student?.full_name || '').toLowerCase();
+    const email = (c.student?.email || '').toLowerCase();
+    const eventTitle = (c.event?.title || '').toLowerCase();
+    return fullName.includes(term) || email.includes(term) || eventTitle.includes(term);
   });
 
   return (

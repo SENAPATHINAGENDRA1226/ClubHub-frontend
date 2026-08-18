@@ -8,6 +8,7 @@ import {
 import api from '../../services/api';
 import { useRealtime } from '../../context/RealtimeContext';
 import { toast } from 'react-hot-toast';
+import { getMediaUrl } from '../../utils/media';
 
 interface Event {
   id: string;
@@ -448,7 +449,7 @@ export const VerifyRegistrationsPage: React.FC = () => {
                     >
                       <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-800 shrink-0 border border-slate-700">
                         {res.student_photo_url ? (
-                          <img src={import.meta.env.VITE_API_BASE_URL?.replace('/api', '') + res.student_photo_url} alt={res.student_name} className="w-full h-full object-cover" />
+                          <img src={getMediaUrl(res.student_photo_url)} alt={res.student_name} className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-lg font-bold text-slate-500">{res.student_name.charAt(0)}</div>
                         )}
@@ -574,7 +575,7 @@ export const VerifyRegistrationsPage: React.FC = () => {
                     <div className="relative">
                       <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-slate-800 bg-slate-950 shadow-2xl relative z-10">
                         {previewData.student_photo_url ? (
-                          <img src={import.meta.env.VITE_API_BASE_URL?.replace('/api', '') + previewData.student_photo_url} alt={previewData.student_name} className="w-full h-full object-cover" />
+                          <img src={getMediaUrl(previewData.student_photo_url)} alt={previewData.student_name} className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-4xl font-black text-slate-600">{previewData.student_name.charAt(0)}</div>
                         )}

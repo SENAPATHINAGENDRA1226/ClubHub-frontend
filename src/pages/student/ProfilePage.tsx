@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import { Mail, Phone, BookOpen, GraduationCap, Github, Linkedin, Instagram, Settings, Save, X, Ticket, CheckCircle2, Camera } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getMediaUrl } from '../../utils/media';
 
 const formatExternalUrl = (url: string, defaultDomain: string) => {
   if (!url) return '';
@@ -63,11 +64,7 @@ export const ProfilePage: React.FC = () => {
   const [selectedQr, setSelectedQr] = useState<{ url: string; regNum: string } | null>(null);
 
   const getPhotoUrl = (rawUrl?: string) => {
-    if (!rawUrl) return '';
-    if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://')) return rawUrl;
-    const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
-    const serverBase = apiBase.replace(/\/api\/?$/, '');
-    return `${serverBase}${rawUrl.startsWith('/') ? '' : '/'}${rawUrl}`;
+    return getMediaUrl(rawUrl);
   };
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {

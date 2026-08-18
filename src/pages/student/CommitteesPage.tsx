@@ -4,10 +4,11 @@ import { useAuth } from '../../context/AuthContext';
 import { useRealtime } from '../../context/RealtimeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
-import { Users, Mail, X, Plus, Phone } from 'lucide-react';
+import { Users, Mail, X, Plus, Phone, Upload, Crown, Star, Loader2 } from 'lucide-react';
 import { ManageableCardOverlay, DeleteConfirmModal } from '../../components/ManageableGrid';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { getMediaUrl } from '../../utils/media';
 
 interface CommitteeMember {
   id: string;
@@ -28,6 +29,29 @@ interface Committee {
   sub_category: 'CSM' | 'CSD' | 'coding' | 'sports' | 'non_technical';
   members: CommitteeMember[];
 }
+
+const isHeadOfDepartment = (roleTitle: string, category: string) => {
+  if (category !== 'faculty') return false;
+  const title = (roleTitle || '').toLowerCase();
+  return title.includes('head of department') || title.includes('head of the department') || title.includes('hod') || title.includes('head');
+};
+
+const isStudentLeader = (roleTitle: string, category: string) => {
+  if (category !== 'student') return false;
+  const title = (roleTitle || '').toLowerCase();
+  return title.includes('president') || title.includes('vice president') || title.includes('vice-president') || title.includes('vp');
+};
+
+const getLeadershipBadge = (roleTitle: string, category: string) => {
+  const title = (roleTitle || '').toLowerCase();
+  if (category === 'faculty') {
+    if (title.includes('head') || title.includes('hod')) return { text: '👑 Head of Department', icon: Crown };
+  } else if (category === 'student') {
+    if (title.includes('vice') || title.includes('vp')) return { text: '⭐ Vice President', icon: Star };
+    if (title.includes('president')) return { text: '👑 President', icon: Crown };
+  }
+  return null;
+};
 
 export const CommitteesPage: React.FC = () => {
   const { role } = useAuth();
@@ -59,6 +83,29 @@ export const CommitteesPage: React.FC = () => {
   const [deletingItem, setDeletingItem] = useState<any>(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadingMemberPhoto, setUploadingMemberPhoto] = useState(false);
+
+  const handleMemberPhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingMemberPhoto(true);
+    const form = new FormData();
+    form.append('file', file);
+
+    try {
+      const res = await api.post('/media/upload', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setMemberForm(prev => ({ ...prev, photo_url: res.data.file_url }));
+      toast.success('Member photo uploaded!');
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to upload member photo');
+    } finally {
+      setUploadingMemberPhoto(false);
+    }
+  };
 
   // Forms
   const [committeeForm, setCommitteeForm] = useState({
@@ -342,49 +389,84 @@ export const CommitteesPage: React.FC = () => {
                   <p className="text-center text-slate-500 text-sm italic">No members added yet.</p>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {committee.members.map(member => (
-                      <div
-                        key={member.id}
-                        onClick={() => !canManage && setSelectedMember(member)}
-                        className="group relative bg-slate-900 border border-slate-800 rounded-3xl p-6 text-center hover:border-sky-500/50 hover:shadow-2xl hover:shadow-sky-900/20 transition-all cursor-pointer"
-                      >
-                        <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden border-4 border-slate-800 group-hover:border-sky-500/30 transition-colors">
-                          {member.photo_url ? (
-                            <img src={import.meta.env.VITE_API_BASE_URL?.replace('/api', '') + member.photo_url} alt={member.full_name} className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full bg-slate-800 flex items-center justify-center text-2xl font-bold text-slate-400 uppercase">
-                              {member.full_name.charAt(0)}
+                    {committee.members.map(member => {
+                      const isHod = isHeadOfDepartment(member.role_title, committee.category);
+                      const isLeader = isStudentLeader(member.role_title, committee.category);
+                      const isGold = isHod || isLeader;
+                      const badgeInfo = getLeadershipBadge(member.role_title, committee.category);
+
+                      return (
+                        <div
+                          key={member.id}
+                          onClick={() => !canManage && setSelectedMember(member)}
+                          className={`group relative rounded-3xl p-6 text-center transition-all cursor-pointer ${
+                            isGold
+                              ? 'bg-gradient-to-b from-amber-950/40 via-slate-900 to-slate-900 border-2 border-amber-400 shadow-xl shadow-amber-500/15 ring-1 ring-amber-400/40 hover:border-amber-300 hover:shadow-amber-500/30 hover:scale-[1.02]'
+                              : 'bg-slate-900 border border-slate-800 hover:border-sky-500/50 hover:shadow-2xl hover:shadow-sky-900/20'
+                          }`}
+                        >
+                          {badgeInfo && (
+                            <div className="flex justify-center mb-3">
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-slate-950 font-extrabold text-[10px] uppercase tracking-wider shadow-md">
+                                {badgeInfo.text}
+                              </span>
                             </div>
                           )}
+
+                          <div className={`w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden transition-all ${
+                            isGold
+                              ? 'border-4 border-amber-400 shadow-lg shadow-amber-500/30 group-hover:scale-105'
+                              : 'border-4 border-slate-800 group-hover:border-sky-500/30'
+                          }`}>
+                            {member.photo_url ? (
+                              <img src={getMediaUrl(member.photo_url)} alt={member.full_name} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className={`w-full h-full flex items-center justify-center text-2xl font-black uppercase ${
+                                isGold ? 'bg-amber-950 text-amber-300' : 'bg-slate-800 text-slate-400'
+                              }`}>
+                                {member.full_name.charAt(0)}
+                              </div>
+                            )}
+                          </div>
+
+                          <h3 className={`text-lg font-bold transition-colors leading-tight ${
+                            isGold ? 'text-white group-hover:text-amber-300' : 'text-white group-hover:text-sky-400'
+                          }`}>
+                            {member.full_name}
+                          </h3>
+
+                          <p className={`text-sm mt-1 ${
+                            isGold ? 'font-extrabold text-amber-400 uppercase tracking-wide' : 'font-semibold text-sky-500'
+                          }`}>
+                            {member.role_title}
+                          </p>
+                          
+                          <ManageableCardOverlay
+                            canManage={canManage}
+                            onEdit={() => {
+                              setMemberForm({
+                                full_name: member.full_name,
+                                email: member.email,
+                                role_title: member.role_title,
+                                faculty_id: member.faculty_id || '',
+                                phone_number: member.phone_number || '',
+                                bio: member.bio || '',
+                                photo_url: member.photo_url || ''
+                              });
+                              setIsEditingMember(true);
+                              setEditingMemberId(member.id);
+                              setSelectedCommitteeId(committee.id);
+                              setIsMemberModalOpen(true);
+                            }}
+                            onDelete={() => {
+                              setDeletingType('member');
+                              setDeletingItem(member);
+                              setIsDeleteModalOpen(true);
+                            }}
+                          />
                         </div>
-                        <h3 className="text-lg font-bold text-white group-hover:text-sky-400 transition-colors leading-tight">{member.full_name}</h3>
-                        <p className="text-sm font-semibold text-sky-500 mt-1">{member.role_title}</p>
-                        
-                        <ManageableCardOverlay
-                          canManage={canManage}
-                          onEdit={() => {
-                            setMemberForm({
-                              full_name: member.full_name,
-                              email: member.email,
-                              role_title: member.role_title,
-                              faculty_id: member.faculty_id || '',
-                              phone_number: member.phone_number || '',
-                              bio: member.bio || '',
-                              photo_url: member.photo_url || ''
-                            });
-                            setIsEditingMember(true);
-                            setEditingMemberId(member.id);
-                            setSelectedCommitteeId(committee.id);
-                            setIsMemberModalOpen(true);
-                          }}
-                          onDelete={() => {
-                            setDeletingType('member');
-                            setDeletingItem(member);
-                            setIsDeleteModalOpen(true);
-                          }}
-                        />
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -421,7 +503,7 @@ export const CommitteesPage: React.FC = () => {
                 <div className="relative pt-12 text-center space-y-4">
                   <div className="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-slate-900 shadow-xl bg-slate-800">
                     {selectedMember.photo_url ? (
-                      <img src={import.meta.env.VITE_API_BASE_URL?.replace('/api', '') + selectedMember.photo_url} alt={selectedMember.full_name} className="w-full h-full object-cover" />
+                      <img src={getMediaUrl(selectedMember.photo_url)} alt={selectedMember.full_name} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-slate-400 uppercase">
                         {selectedMember.full_name.charAt(0)}
@@ -625,13 +707,33 @@ export const CommitteesPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Photo URL (Optional)</label>
-                <input
-                  type="url"
-                  value={memberForm.photo_url}
-                  onChange={e => setMemberForm({ ...memberForm, photo_url: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-sky-500 transition-colors"
-                />
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Member Photo (URL or File Upload)</label>
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="text"
+                    placeholder="https://example.com/photo.jpg or upload below"
+                    value={memberForm.photo_url}
+                    onChange={e => setMemberForm({ ...memberForm, photo_url: e.target.value })}
+                    className="flex-1 px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-sky-500 transition-colors"
+                  />
+                  <label className="px-4 py-3 bg-slate-800 hover:bg-slate-700 text-sky-400 border border-slate-700 rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer shrink-0 transition-colors">
+                    {uploadingMemberPhoto ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                    <span>{uploadingMemberPhoto ? 'Uploading...' : 'Upload'}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleMemberPhotoUpload}
+                      disabled={uploadingMemberPhoto}
+                    />
+                  </label>
+                </div>
+                {memberForm.photo_url && (
+                  <div className="mt-2 flex items-center gap-3">
+                    <img src={getMediaUrl(memberForm.photo_url)} alt="Preview" className="w-10 h-10 rounded-full object-cover border border-slate-700" />
+                    <span className="text-xs text-slate-400 truncate max-w-xs">{memberForm.photo_url}</span>
+                  </div>
+                )}
               </div>
 
               <div>

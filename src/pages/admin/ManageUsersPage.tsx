@@ -19,6 +19,7 @@ import {
   ManageableCardOverlay,
   DeleteConfirmModal
 } from '../../components/ManageableGrid';
+import { getMediaUrl } from '../../utils/media';
 
 interface UserRecord {
   id: string;
@@ -292,8 +293,12 @@ export const ManageUsersPage: React.FC = () => {
               <div>
                 <div className="flex items-start justify-between gap-3 mb-4 pr-12">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-600 to-indigo-600 text-white font-black text-lg flex items-center justify-center shadow-lg shadow-sky-900/30">
-                      {u.profile?.full_name ? u.profile.full_name.charAt(0).toUpperCase() : u.email.charAt(0).toUpperCase()}
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-600 to-indigo-600 text-white font-black text-lg flex items-center justify-center shadow-lg shadow-sky-900/30 overflow-hidden shrink-0">
+                      {u.profile?.profile_photo_url ? (
+                        <img src={getMediaUrl(u.profile.profile_photo_url)} alt={u.profile?.full_name || 'User'} className="w-full h-full object-cover" />
+                      ) : (
+                        <span>{u.profile?.full_name ? u.profile.full_name.charAt(0).toUpperCase() : u.email.charAt(0).toUpperCase()}</span>
+                      )}
                     </div>
                     <div>
                       <h3 className="font-bold text-white text-base leading-snug line-clamp-1">

@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useRealtime } from '../context/RealtimeContext';
 import { useTheme } from '../context/ThemeContext';
 import api from '../services/api';
+import { getMediaUrl } from '../utils/media';
 import { Award, Calendar, Users, Trophy, Sun, Sunrise, Sunset, Moon, Clock, Maximize2, X, BarChart3, Sparkles, Activity, ArrowUpRight, LineChart as LineChartIcon, Layers, ShieldCheck, Flame } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -234,11 +235,7 @@ export const StudentDashboard: React.FC = () => {
     : [];
 
   const getPhotoUrl = (rawUrl?: string) => {
-    if (!rawUrl) return '';
-    if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://')) return rawUrl;
-    const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
-    const serverBase = apiBase.replace(/\/api\/?$/, '');
-    return `${serverBase}${rawUrl.startsWith('/') ? '' : '/'}${rawUrl}`;
+    return getMediaUrl(rawUrl);
   };
 
   return (
