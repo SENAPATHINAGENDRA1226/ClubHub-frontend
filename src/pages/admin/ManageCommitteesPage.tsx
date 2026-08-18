@@ -190,7 +190,7 @@ export const ManageCommitteesPage: React.FC = () => {
 
   const handleDeleteMember = async (memberId: string) => {
     try {
-      await api.delete(`/committees/members/${memberId}`);
+      await api.delete(`/committee-members/${memberId}`);
       toast.success('Member removed from committee');
       if (selectedCommitteeForMember) {
         const updated = selectedCommitteeForMember.members?.filter((m) => m.id !== memberId) || [];

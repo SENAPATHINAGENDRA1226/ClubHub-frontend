@@ -195,20 +195,52 @@ export const CommitteesPage: React.FC = () => {
 
   const handleMemberSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!memberForm.full_name.trim()) {
+      toast.error('Please enter member full name');
+      return;
+    }
+    if (!memberForm.role_title.trim()) {
+      toast.error('Please enter member role title');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
+      const payload = {
+        full_name: memberForm.full_name.trim(),
+        role_title: memberForm.role_title.trim(),
+        email: memberForm.email.trim() || undefined,
+        faculty_id: memberForm.faculty_id.trim() || null,
+        phone_number: memberForm.phone_number.trim() || null,
+        photo_url: memberForm.photo_url.trim() || null,
+        bio: memberForm.bio.trim() || null,
+      };
+
       if (isEditingMember && editingMemberId) {
-        await api.put(`/committee-members/${editingMemberId}`, memberForm);
+        await api.put(`/committee-members/${editingMemberId}`, payload);
+        toast.success('Member updated successfully');
       } else {
-        if (!selectedCommitteeId) return;
-        await api.post(`/committees/${selectedCommitteeId}/members`, memberForm);
+        if (!selectedCommitteeId) {
+          toast.error('Please select a committee first');
+          return;
+        }
+        await api.post(`/committees/${selectedCommitteeId}/members`, payload);
+        toast.success('Member added successfully');
       }
       setIsMemberModalOpen(false);
       setIsEditingMember(false);
       setEditingMemberId(null);
       fetchCommittees();
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      console.error('Save member error:', err);
+      const detail = err.response?.data?.detail;
+      if (typeof detail === 'string') {
+        toast.error(detail);
+      } else if (Array.isArray(detail)) {
+        toast.error(detail.map((d: any) => d.msg || d.detail).join(', '));
+      } else {
+        toast.error('Failed to save member');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -224,14 +256,14 @@ export const CommitteesPage: React.FC = () => {
         toast.success('Committee deleted');
         setCommittees((prev) => prev.filter((c) => c.id !== itemToDelete.id));
       } else {
-        await api.delete(`/committees/members/${itemToDelete.id}`);
+        await api.delete(`/committee-members/${itemToDelete.id}`);
         toast.success('Member removed');
       }
       setIsDeleteModalOpen(false);
       setDeletingItem(null);
       fetchCommittees();
     } catch (err: any) {
-      console.error('Delete committee error:', err);
+      console.error('Delete error:', err);
       toast.error(err.response?.data?.detail || 'Failed to delete item');
     } finally {
       setIsSubmitting(false);
